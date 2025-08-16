@@ -28,8 +28,17 @@ export function SermonCard({ sermon }: SermonCardProps) {
           src={thumbnail}
           alt={title}
           fill
+          unoptimized={thumbnail.includes('ytimg.com')}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={false}
+          loading="lazy"
+          onError={(e) => {
+            // Fallback to a default image if the thumbnail fails to load
+            const target = e.target as HTMLImageElement;
+            target.src = '/images/placeholder.jpg';
+            target.onerror = null; // Prevent infinite loop if placeholder also fails
+          }}
         />
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <Button

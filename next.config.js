@@ -10,19 +10,37 @@ const nextConfig = {
 
   // Image optimization
   images: {
+    domains: [
+      'i.ytimg.com',
+      'img.youtube.com',
+      'images.unsplash.com'
+    ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'i.ytimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+        port: '',
         pathname: '/**',
       },
     ],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ['image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 7, // 1 week
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
   },
 
   // Webpack configuration
