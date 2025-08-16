@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+  functions = ".next/functions"
+
+[build.environment]
+  NODE_VERSION = "22.18.0"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
