@@ -1,19 +1,23 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Menu, User } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Menu, User } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar } from "@/components/ui/avatar";
+import Image from "next/image";
+import churchLogo from "@/assets/logo.png";
+import profileImage from "@/assets/profile.png";
 
 const navItems = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Sermons', href: '/sermons' },
-  { name: 'Ministries', href: '/ministries' },
-  { name: 'Online', href: '/online' },
-  { name: 'Giving', href: '/giving' },
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Sermons", href: "/sermons" },
+  { name: "Ministries", href: "/ministries" },
+  { name: "Online", href: "/online" },
+  { name: "Giving", href: "/giving" },
 ];
 
 export function MainNav() {
@@ -24,10 +28,28 @@ export function MainNav() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo on the left */}
-          <Link href="/" className="flex items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Rhema Faith AG Church
-            </span>
+          <Link
+            href="/"
+            className="flex items-center space-x-3 hover:opacity-90 transition-opacity"
+          >
+            <div className="flex-shrink-0">
+              <Image
+                src={churchLogo}
+                alt="Rhema Faith AG Church Logo"
+                width={43}
+                height={43}
+                className="rounded-full border-1"
+                priority
+              />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-lg font-bold text-indigo-800">
+                Rhema Faith
+              </span>
+              <span className="text-sm font-medium text-gray-600">
+                AG Church
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -37,27 +59,41 @@ export function MainNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-foreground/80',
-                  pathname === item.href ? 'text-foreground' : 'text-foreground/60'
+                  "text-base font-medium transition-colors hover:text-foreground/80",
+                  pathname === item.href
+                    ? "text-foreground"
+                    : "text-foreground/60"
                 )}
               >
                 {item.name}
               </Link>
             ))}
-            
-            {/* Profile Icon */}
-            <Button variant="ghost" size="icon" className="ml-4">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Profile</span>
-            </Button>
+
+            {/* Profile Avatar */}
+            <div className="ml-4">
+              <Link href="/profile" className="block">
+                <Avatar
+                  src={profileImage.src}
+                  alt="User Profile"
+                  className="h-6.5 w-6.5 hover:opacity-80 transition-opacity"
+                />
+                <span className="sr-only">Profile</span>
+              </Link>
+            </div>
           </nav>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <Button variant="ghost" size="icon" className="mr-2">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Profile</span>
-            </Button>
+            <div className="mr-2">
+              <Link href="/profile" className="block">
+                <Avatar
+                  src={profileImage.src}
+                  alt="User Profile"
+                  className="h-10 w-10 hover:opacity-80 transition-opacity"
+                />
+                <span className="sr-only">Profile</span>
+              </Link>
+            </div>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -72,10 +108,10 @@ export function MainNav() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'block py-2 px-4 rounded-lg transition-colors',
+                        "block py-2 px-4 rounded-lg transition-colors",
                         pathname === item.href
-                          ? 'bg-muted font-medium'
-                          : 'hover:bg-muted/50'
+                          ? "bg-muted font-medium"
+                          : "hover:bg-muted/50"
                       )}
                     >
                       {item.name}
