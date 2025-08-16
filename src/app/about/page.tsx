@@ -101,7 +101,7 @@ export default function About() {
             RFAG Church was founded in January 2011 by Rev. R. Prabhu, who was
             born and raised in J.J.R. Nagar near Mysore Road. After accepting
             Jesus Christ as his Lord and Savior, Rev. Prabhu pursued theological
-            education and was called to serve God's kingdom.
+            education and was called to serve God&apos;s kingdom.
           </p>
           <p className="mt-4 text-gray-600 text-left max-w-3xl mx-auto text-lg">
             What began as a humble gathering of five members on a rooftop has

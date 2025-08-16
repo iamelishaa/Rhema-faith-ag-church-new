@@ -86,7 +86,7 @@ export default function Events() {
         <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">Events</h1>
           <p className="mt-6 max-w-3xl text-xl text-indigo-100">
-            Join us for our upcoming events and activities. There's something for everyone!
+            Join us for our upcoming events and activities. There&apos;s something for everyone!
           </p>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function Events() {
             <span className="block">Let us know!</span>
           </h2>
           <p className="mt-4 text-lg leading-6 text-indigo-200">
-            We're always looking for new ways to serve our community and grow together in faith.
+            We&apos;re always looking for new ways to serve our community and grow together in faith.
           </p>
           <a
             href="/contact"

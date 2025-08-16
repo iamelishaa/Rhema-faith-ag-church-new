@@ -181,10 +181,10 @@ export default function Home() {
             >
               <div className="mb-6">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mb-4">
-                  Children's Ministry
+                  Children&apos;s Ministry
                 </span>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Children's Ministry
+                  Children&apos;s Ministry
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   Nurturing young hearts and minds in the love of Christ through
@@ -247,7 +247,7 @@ export default function Home() {
                   Community Outreach
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Serving our community and sharing God's love through practical
+                  Serving our community and sharing God&apos;s love through practical
                   acts of service, compassion, and intentional relationships.
                 </p>
               </div>
@@ -269,10 +269,10 @@ export default function Home() {
             >
               <div className="mb-6">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mb-4">
-                  Women's Ministry
+                  Women&apos;s Ministry
                 </span>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Women's Ministry
+                  Women&apos;s Ministry
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   Empowering women of all ages to grow in faith, build authentic
@@ -464,11 +464,11 @@ export default function Home() {
               You belong here.
             </h2>
             <p className="mt-4 text-2xl sm:text-3xl font-semibold text-gray-200">
-              This is more than a visit — it’s a divine appointment.
+              This is more than a visit &#8212; it&#39;s a divine appointment.
             </p>
             <p className="mt-6 text-lg text-gray-200 max-w-xl">
-              Whether you're new to faith, looking for a church family, or just
-              curious — you are welcome. Join us this Sunday and experience
+              Whether you&#39;re new to faith, looking for a church family, or just
+              curious &#8212; you are welcome. Join us this Sunday and experience
               uplifting worship, biblical teaching, and a community that feels
               like home.
             </p>
