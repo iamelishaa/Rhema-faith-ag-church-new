@@ -59,9 +59,24 @@ export async function getLatestSermons(
     // Format the response
     const items = videosData.items.map((video: any) => {
       // Use maxres thumbnail if available, otherwise fall back to high
-      const thumbnail =
+      // Ensure we're using HTTPS and the correct domain for YouTube thumbnails
+      let thumbnail = 
         video.snippet.thumbnails.maxres?.url ||
-        video.snippet.thumbnails.high.url;
+        video.snippet.thumbnails.high?.url ||
+        video.snippet.thumbnails.standard?.url ||
+        video.snippet.thumbnails.medium?.url ||
+        video.snippet.thumbnails.default?.url ||
+        `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+      
+      // Ensure the URL uses HTTPS and the correct domain
+      if (thumbnail) {
+        thumbnail = thumbnail
+          .replace('http://', 'https://')
+          .replace('i1.ytimg.com', 'i.ytimg.com')
+          .replace('i2.ytimg.com', 'i.ytimg.com')
+          .replace('i3.ytimg.com', 'i.ytimg.com')
+          .replace('i4.ytimg.com', 'i.ytimg.com');
+      }
 
       return {
         id: video.id,

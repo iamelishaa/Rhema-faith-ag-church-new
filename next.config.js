@@ -12,13 +12,42 @@ const nextConfig = {
   images: {
     domains: [
       'i.ytimg.com',
+      'i1.ytimg.com',
+      'i2.ytimg.com',
+      'i3.ytimg.com',
+      'i4.ytimg.com',
       'img.youtube.com',
-      'images.unsplash.com'
+      'images.unsplash.com',
+      'rhema-faith-ag-church.netlify.app'
     ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'i.ytimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i1.ytimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i2.ytimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i3.ytimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i4.ytimg.com',
         port: '',
         pathname: '/**',
       },
@@ -31,6 +60,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'rhema-faith-ag-church.netlify.app',
         port: '',
         pathname: '/**',
       },
