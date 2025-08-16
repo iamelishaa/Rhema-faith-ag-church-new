@@ -1,123 +1,132 @@
-import Image from 'next/image';
+import Image from "next/image";
+import Link from "next/link";
+import pastorFamily from "@/assets/pastor-family.jpg";
+import { Button } from "@/components/ui/button"; // make sure shadcn/ui Button is imported
 
 export default function About() {
   return (
     <div className="bg-white">
-      {/* Hero Section */}
-      <div className="relative bg-indigo-800">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-indigo-800 mix-blend-multiply" aria-hidden="true" />
+      {/* Who We Are / Our Beliefs / Our Values */}
+      <div className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-gray-900">
+              Who We Are
+            </h2>
+            <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+              Discover who we are, what we believe, and the values that guide
+              our church community.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Who We Are Card */}
+            <div className="bg-[#F5F5F5] rounded-xl p-8 text-center transition">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Who We Are
+              </h3>
+              <p className="text-gray-600 mb-4">
+                We are a community dedicated to worship, discipleship, and
+                service, helping people grow in their faith.
+              </p>
+              <Button
+                variant="default"
+                className="bg-black text-white border-black hover:bg-gray-800"
+                asChild
+              >
+                <Link href="/about">Learn More</Link>
+              </Button>
+            </div>
+
+            {/* Our Beliefs Card */}
+            <div className="bg-[#F5F5F5] rounded-xl p-8 text-center transition">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Our Beliefs
+              </h3>
+              <p className="text-gray-600 mb-4">
+                We are committed to the fundamental truths of the Christian
+                faith as revealed in the Bible.
+              </p>
+              <Button
+                variant="default"
+                className="bg-black text-white border-black hover:bg-gray-800"
+                asChild
+              >
+                <Link href="/beliefs">Explore Beliefs</Link>
+              </Button>
+            </div>
+
+            {/* Our Values Card */}
+            <div className="bg-[#F5F5F5] rounded-xl p-8 text-center transition">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Our Values
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Our values reflect the heart of our church community and guide
+                how we live out our faith together.
+              </p>
+              <Button
+                variant="default"
+                className="bg-black text-white border-black hover:bg-gray-800"
+                asChild
+              >
+                <Link href="/values">Discover Values</Link>
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">About Us</h1>
-          <p className="mt-6 max-w-3xl text-xl text-indigo-100">
-            Learn more about our church, our beliefs, and our mission to serve the community.
+      </div>
+
+      {/* Meet Our Pastors */}
+      <div className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h4 className="text-lg font-medium text-gray-500">
+            Meet Our Pastors
+          </h4>
+          <h2 className="text-5xl font-extrabold text-gray-900 mt-2">
+            Pastor R. Prabhu & Kavitha Prabhu
+          </h2>
+
+          <div className="mt-8 flex justify-center">
+            <Image
+              src={pastorFamily}
+              alt="Pastor R. Prabhu and Kavitha Prabhu"
+              className="rounded-xl shadow-lg object-cover"
+              width={800}
+              height={500}
+            />
+          </div>
+
+          <p className="mt-8 text-gray-600 text-left max-w-3xl mx-auto text-lg">
+            RFAG Church was founded in January 2011 by Rev. R. Prabhu, who was
+            born and raised in J.J.R. Nagar near Mysore Road. After accepting
+            Jesus Christ as his Lord and Savior, Rev. Prabhu pursued theological
+            education and was called to serve God's kingdom.
+          </p>
+          <p className="mt-4 text-gray-600 text-left max-w-3xl mx-auto text-lg">
+            What began as a humble gathering of five members on a rooftop has
+            grown into a vibrant community of nearly 300 believers who gather
+            every Sunday to worship and grow in faith.
           </p>
         </div>
       </div>
 
-      {/* Our Story */}
-      <div className="py-16 bg-white overflow-hidden lg:py-24">
-        <div className="relative max-w-xl mx-auto px-4 sm:px-6 lg:px-8 lg:max-w-7xl">
-          <div className="relative">
-            <h2 className="text-center text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Our Story
-            </h2>
-            <p className="mt-6 text-xl text-gray-500 text-center max-w-3xl mx-auto">
-              Rhema Faith AG Church was founded in 2005 with a small group of believers who had a vision to create a welcoming community of faith. 
-              Over the years, we've grown into a vibrant church family dedicated to worship, discipleship, and service.
-            </p>
-          </div>
-
-          <div className="mt-12 lg:mt-24 lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-            <div className="relative">
-              <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0">
-                <div className="pt-12 sm:pt-16 lg:pt-20">
-                  <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
-                    Our Mission
-                  </h2>
-                  <p className="mt-6 text-gray-500 text-lg">
-                    To lead people into a growing relationship with Jesus Christ through worship, discipleship, and service. 
-                    We are committed to sharing the love of God with our community and the world.
-                  </p>
-                </div>
-                <div className="mt-10">
-                  <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
-                    Our Vision
-                  </h2>
-                  <p className="mt-6 text-gray-500 text-lg">
-                    To be a church where lives are transformed by the power of the Gospel, where people discover their God-given purpose, 
-                    and where the love of Christ is demonstrated in practical ways to those in need.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-10 -mx-4 relative lg:mt-0">
-              <div className="relative mx-auto w-full rounded-lg shadow-lg">
-                <div className="relative block w-full bg-white rounded-lg overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                    alt="Church gathering"
-                    width={800}
-                    height={600}
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Our Beliefs */}
-      <div className="bg-gray-50 py-16 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Our Core Beliefs</h2>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
-              We believe in the fundamental truths of Christianity as revealed in the Bible.
-            </p>
-          </div>
-
-          <div className="mt-16">
-            <div className="space-y-16">
-              {[
-                {
-                  name: 'The Bible',
-                  description: 'We believe the Bible is the inspired and infallible Word of God, the final authority for faith and life.'
-                },
-                {
-                  name: 'The Trinity',
-                  description: 'We believe in one God, eternally existing in three persons: Father, Son, and Holy Spirit.'
-                },
-                {
-                  name: 'Salvation',
-                  description: 'We believe in salvation by grace through faith in Jesus Christ, who died for our sins and rose again.'
-                },
-                {
-                  name: 'The Church',
-                  description: 'We believe in the universal church, the body of Christ, of which all believers are members.'
-                },
-                {
-                  name: 'The Great Commission',
-                  description: 'We believe in the Great Commission to make disciples of all nations, baptizing and teaching them to obey Christ.'
-                }
-              ].map((belief, index) => (
-                <div key={belief.name} className="flex">
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-                      <span className="text-lg font-bold">{index + 1}</span>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">{belief.name}</h3>
-                    <p className="mt-2 text-gray-500">{belief.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* CTA */}
+      <div className="py-20 bg-gray-50 text-center">
+        <h2 className="text-4xl font-extrabold text-gray-900">
+          Plan Your Visit
+        </h2>
+        <p className="mt-4 text-xl text-gray-700 max-w-2xl mx-auto">
+          Join us for a worship experience and discover your purpose in Christ.
+        </p>
+        <div className="mt-10">
+          <Button
+            variant="default"
+            className="bg-black text-white border-black hover:bg-gray-800"
+            asChild
+          >
+            <Link href="/services">Service Times</Link>
+          </Button>
         </div>
       </div>
     </div>
