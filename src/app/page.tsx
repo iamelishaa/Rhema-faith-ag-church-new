@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
+import { YouTubeVideo } from "@/lib/youtube";
 
 // Simple grid layout for events and testimonials
 const EventCard = ({ event }: { event: any }) => (
@@ -88,36 +88,19 @@ const TestimonialCard = ({ testimonial }: { testimonial: any }) => (
   </div>
 );
 
-// Mock data - Replace with your actual data
-const featuredSermons = [
-  {
-    id: 1,
-    title: "The Power of Faith",
-    speaker: "Pastor John Doe",
-    duration: "45 min",
-    image:
-      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Faith",
-  },
-  {
-    id: 2,
-    title: "Walking in Love",
-    speaker: "Pastor Jane Smith",
-    duration: "38 min",
-    image:
-      "https://images.unsplash.com/photo-1501281667305-0d4e0f46dc07?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Love",
-  },
-  {
-    id: 3,
-    title: "Finding Peace in Chaos",
-    speaker: "Pastor Michael Johnson",
-    duration: "52 min",
-    image:
-      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Peace",
-  },
-];
+// YouTube API integration
+const fetchSermons = async (): Promise<YouTubeVideo[]> => {
+  try {
+    const response = await fetch("/api/sermons");
+    if (!response.ok) {
+      throw new Error("Failed to fetch sermons");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching sermons:", error);
+    return [];
+  }
+};
 
 const upcomingEvents = [
   {
@@ -174,13 +157,33 @@ const testimonials = [
 ];
 
 export default function Home() {
-  const [isMounted, setIsMounted] = useState(false);
+  const [sermons, setSermons] = useState<YouTubeVideo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsMounted(true);
+    const loadSermons = async () => {
+      try {
+        const data = await fetchSermons();
+        setSermons(data);
+      } catch (err) {
+        setError("Failed to load sermons. Please try again later.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSermons();
   }, []);
 
-  if (!isMounted) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -458,57 +461,61 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredSermons.map((sermon) => (
-              <div
-                key={sermon.id}
-                className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+          {error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+              <Button
+                onClick={() => window.location.reload()}
+                className="mt-4"
+                variant="outline"
               >
-                <div className="relative h-56 w-full">
-                  <Image
-                    src={sermon.image}
-                    alt={sermon.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                    <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-full">
-                      {sermon.category}
-                    </span>
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {sermons.slice(0, 3).map((sermon) => (
+                <div
+                  key={sermon.id}
+                  className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+                >
+                  <div className="relative h-56 w-full">
+                    <Image
+                      src={sermon.thumbnail}
+                      alt={sermon.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <a
+                      href={`https://www.youtube.com/watch?v=${sermon.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium"
+                    >
+                      Watch on YouTube
+                      <svg
+                        className="w-4 h-4 ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        />
+                      </svg>
+                    </a>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {sermon.title}
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    {sermon.speaker} • {sermon.duration}
-                  </p>
-                  <Link
-                    href={`/sermons/${sermon.id}`}
-                    className="mt-4 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium"
-                  >
-                    Watch Now
-                    <svg
-                      className="w-4 h-4 ml-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <Link
@@ -535,27 +542,104 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Upcoming Events */}
+      {/* Volunteer Opportunities */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
-              EVENTS
+              GET INVOLVED
             </span>
             <h2 className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-              Upcoming Events
+              Volunteer Opportunities
             </h2>
             <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500 dark:text-gray-300">
-              Join us for worship, fellowship, and community events
+              Use your gifts to serve and make a difference in our church family
             </p>
           </div>
 
-          <div className="mt-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {upcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {/* Ushers */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+              <div className="relative h-40 w-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <svg className="w-16 h-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Ushers</h3>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  Welcome and assist attendees, distribute bulletins, and help maintain a smooth service flow.
+                </p>
+              </div>
             </div>
+
+            {/* Worship Team */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+              <div className="relative h-40 w-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <svg className="w-16 h-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Worship Team</h3>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  Use your musical gifts to lead the congregation in worship through vocals or instruments.
+                </p>
+              </div>
+            </div>
+
+            {/* Kids Ministry */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+              <div className="relative h-40 w-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <svg className="w-16 h-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Kids Ministry</h3>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  Help nurture the faith of our youngest members through teaching, crafts, and activities.
+                </p>
+              </div>
+            </div>
+
+            {/* Tech/Media */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+              <div className="relative h-40 w-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <svg className="w-16 h-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Tech/Media</h3>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  Operate sound, lighting, or video equipment to enhance our worship experience.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/volunteer/signup"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-300"
+            >
+              Serve Now
+              <svg
+                className="w-5 h-5 ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </Link>
           </div>
         </div>
       </section>
@@ -594,79 +678,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Latest News */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
-              LATEST NEWS
-            </span>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-              Church Updates
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500 dark:text-gray-300">
-              Stay connected with the latest news and announcements
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* News Item 1 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="relative h-48 w-full">
-                <Image
-                  src="https://images.unsplash.com/photo-1501281667305-0d4e0f46dc07?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Church Event"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-4">
-                  <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-full">
-                    Announcement
-                  </span>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <time dateTime="2023-06-15">June 15, 2023</time>
-                </div>
-                <h3 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">
-                  Summer Bible Study Series Starting Soon
-                </h3>
-                <p className="mt-3 text-gray-600 dark:text-gray-300">
-                  Join us for our 6-week summer Bible study series starting next
-                  month. All are welcome!
-                </p>
-                <Link
-                  href="/news/summer-bible-study"
-                  className="mt-4 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium"
-                >
-                  Read More
-                  <svg
-                    className="w-4 h-4 ml-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-
-            {/* Add more news items as needed */}
-          </div>
-        </div>
-      </section>
-
       {/* Newsletter Signup */}
       <section className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
