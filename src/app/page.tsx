@@ -30,7 +30,9 @@ const fetchSermons = async (): Promise<YouTubeVideo[]> => {
     if (!response.ok) {
       throw new Error("Failed to fetch sermons");
     }
-    return await response.json();
+    const data = await response.json();
+    // Handle both the case where the API returns { items } and where it returns the array directly
+    return Array.isArray(data) ? data : data.items || [];
   } catch (error) {
     console.error("Error fetching sermons:", error);
     return [];
@@ -46,6 +48,11 @@ export default function Home() {
     const loadSermons = async () => {
       try {
         const data = await fetchSermons();
+        console.log("Sermons data:", {
+          data,
+          type: typeof data,
+          isArray: Array.isArray(data),
+        });
         setSermons(data);
       } catch (err) {
         setError("Failed to load sermons. Please try again later.");
@@ -77,11 +84,9 @@ export default function Home() {
             fill
             priority
             quality={100}
-            className="object-cover"
+            className="object-cover object-center sm:object-right opacity-90"
             style={{
               objectFit: "cover",
-              objectPosition: "right center", // 👈 moves image to the right
-              opacity: 0.9,
             }}
           />
         </div>
@@ -300,7 +305,11 @@ export default function Home() {
             </p>
           </div>
 
-          {error ? (
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+            </div>
+          ) : error ? (
             <div className="text-center py-12">
               <p className="text-red-500">{error}</p>
               <Button
@@ -313,7 +322,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {sermons.slice(0, 3).map((sermon) => (
+              {(sermons || []).slice(0, 3).map((sermon) => (
                 <div
                   key={sermon.id}
                   className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg  transition-shadow duration-300"

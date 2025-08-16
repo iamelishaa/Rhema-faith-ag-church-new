@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Welcome to Rhema Faith AG Church - A place of worship and community",
   icons: {
-    icon: "/file.svg",
+    icon: "/favicon.ico",
   },
 };
 
