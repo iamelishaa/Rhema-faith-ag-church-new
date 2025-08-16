@@ -30,7 +30,7 @@ export function MainNav() {
           {/* Logo on the left */}
           <Link
             href="/"
-            className="flex items-center space-x-3 hover:opacity-90 transition-opacity"
+            className="flex items-center space-x-3 transition-opacity"
           >
             <div className="flex-shrink-0">
               <Image
@@ -43,7 +43,7 @@ export function MainNav() {
               />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-lg font-bold text-indigo-800">
+              <span className="text-lg font-bold text-Black-800">
                 Rhema Faith
               </span>
               <span className="text-sm font-medium text-gray-600">

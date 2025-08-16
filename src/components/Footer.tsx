@@ -15,7 +15,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Our Story
                 </Link>
@@ -23,7 +23,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about#beliefs"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Our Beliefs
                 </Link>
@@ -31,7 +31,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about#leadership"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Leadership
                 </Link>
@@ -46,7 +46,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/ministries#youth"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Youth
                 </Link>
@@ -54,7 +54,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/ministries#children"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Children
                 </Link>
@@ -62,7 +62,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/ministries#worship"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Worship
                 </Link>
@@ -77,7 +77,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/sermons"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Sermons
                 </Link>
@@ -85,7 +85,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/events"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Events
                 </Link>
@@ -93,7 +93,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/give"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Give
                 </Link>
@@ -108,7 +108,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Contact Us
                 </Link>
@@ -116,7 +116,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/prayer"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Prayer Request
                 </Link>
@@ -124,7 +124,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/visit"
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#5b5da6]"
+                  className="text-gray-600 dark:text-gray-400 hover:text-black"
                 >
                   Plan a Visit
                 </Link>

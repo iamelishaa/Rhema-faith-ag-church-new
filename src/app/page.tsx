@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import pastorFamilyImage from "@/assets/pastor-family.jpg";
 import pastorImage from "@/assets/pastor.png";
 import { YouTubeVideo } from "@/lib/youtube";
 import {
@@ -100,7 +101,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/about"
-                  className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg bg-transparent hover:bg-white hover:text-indigo-700 transition duration-300 inline-flex items-center justify-center gap-2"
+                  className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg bg-transparent hover:bg-white hover:text-black transition duration-300 inline-flex items-center justify-center gap-2"
                 >
                   Learn More
                   <ArrowRight className="w-4 h-4" />
@@ -108,7 +109,7 @@ export default function Home() {
 
                 <Link
                   href="/sermons"
-                  className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg bg-transparent hover:bg-white hover:text-indigo-700 transition duration-300 inline-flex items-center justify-center gap-2"
+                  className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg bg-transparent hover:bg-white hover:text-black transition duration-300 inline-flex items-center justify-center gap-2"
                 >
                   Watch Sermons
                   <Play className="w-4 h-4" />
@@ -331,7 +332,7 @@ export default function Home() {
                       href={`https://www.youtube.com/watch?v=${sermon.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center text-[#5b5da6] dark:text-[#7d7fcc] hover:text-[#4a4c8a] font-medium gap-1 transition-colors duration-200"
+                      className="mt-4 inline-flex items-center text-[#282828] dark:text-[#282828] hover:text-black font-medium gap-1 transition-colors duration-200"
                     >
                       Watch on YouTube
                       <ArrowUpRight className="w-4 h-4" />
@@ -346,11 +347,14 @@ export default function Home() {
             <Button
               variant="outline"
               asChild
-              className="px-6 py-6 text-base border-[#5b5da6] text-[#5b5da6] hover:bg-[#5b5da6]/10 dark:border-[#7d7fcc] dark:text-[#7d7fcc] dark:hover:bg-[#7d7fcc]/10"
+              className="group px-6 py-6 text-base border-black text-black hover:bg-white transition duration-300"
             >
-              <Link href="/sermons" className="inline-flex items-center gap-2">
+              <Link
+                href="/sermons"
+                className="inline-flex items-center gap-2 group-hover:text-black"
+              >
                 View All Sermons
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 group-hover:text-black" />
               </Link>
             </Button>
           </div>
@@ -428,7 +432,7 @@ export default function Home() {
             <Button
               variant="outline"
               asChild
-              className="px-8 py-6 text-lg border-[#5b5da6] text-[#5b5da6] hover:bg-[#5b5da6]/10 
+              className="px-8 py-6 text-lg border-[#282828] dark:border-[#282828] text-[#282828] dark:text-[#282828] hover:bg-[#5b5da6]/10 
                dark:border-[#7d7fcc] dark:text-[#7d7fcc] dark:hover:bg-[#7d7fcc]/10 "
             >
               <Link
@@ -443,18 +447,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-[#5b5da6] text-white">
+      <section className="py-20 bg-[#282828] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text Section */}
           <div>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
               You belong here.
             </h2>
-            <p className="mt-4 text-2xl sm:text-3xl font-semibold text-indigo-100">
+            <p className="mt-4 text-2xl sm:text-3xl font-semibold text-gray-200">
               This is more than a visit — it’s a divine appointment.
             </p>
-            <p className="mt-6 text-lg text-indigo-100 max-w-xl">
+            <p className="mt-6 text-lg text-gray-200 max-w-xl">
               Whether you're new to faith, looking for a church family, or just
               curious — you are welcome. Join us this Sunday and experience
               uplifting worship, biblical teaching, and a community that feels
@@ -463,14 +466,14 @@ export default function Home() {
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/services"
-                className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-[#5b5da6] bg-white hover:bg-gray-100 transition-colors duration-300"
+                className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-[#3b375e] bg-white hover:bg-gray-200 transition-colors duration-300"
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Service Times
               </Link>
               <Link
                 href="/directions"
-                className="inline-flex items-center px-8 py-3 border border-white text-base font-medium rounded-md text-white border-2 hover:bg-[#4b4d96] transition-colors duration-300"
+                className="inline-flex items-center px-8 py-3 border-2 border-white text-white rounded-md bg-transparent hover:bg-white hover:text-black transition-colors duration-300"
               >
                 <MapPin className="w-5 h-5 mr-2" />
                 Get Directions
@@ -481,11 +484,12 @@ export default function Home() {
           {/* Image Section */}
           <div className="flex justify-center lg:justify-end">
             <Image
-              src="/pastor-family.jpg"
+              src={pastorFamilyImage}
               alt="Pastor and family"
               width={500}
               height={500}
               className="rounded-2xl shadow-lg object-cover"
+              priority
             />
           </div>
         </div>
@@ -494,7 +498,7 @@ export default function Home() {
       {/* Newsletter Signup */}
       <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="relative overflow-hidden bg-[#5b5da6] text-white rounded-3xl shadow-xl px-6 py-16 sm:px-12 lg:flex lg:items-center lg:gap-12">
+          <div className="relative overflow-hidden bg-[#282828] text-white rounded-3xl shadow-xl px-6 py-16 sm:px-12 lg:flex lg:items-center lg:gap-12">
             {/* Left Text Section */}
             <div className="lg:w-1/2">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
