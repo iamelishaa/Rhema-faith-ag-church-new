@@ -8,35 +8,19 @@ import { IMAGES } from "@/lib/images";
 import { 
   ArrowRight,
   ArrowUpRight,
-  ChevronRight,
+  Calendar,
+  Clock,
   Mail,
-  MapPin,
+  Phone,
+  Video as VideoIcon,
   Play,
   Users,
   Music,
   BookOpen,
-  Video as VideoIcon,
-  Mic2,
-  ArrowRightCircle,
-  Calendar,
-  Clock,
-  Phone,
-  Send,
-  Check,
-  X,
-  Loader2
+  MapPin
 } from "lucide-react";
 
 interface YouTubeVideo {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  publishedAt: string;
-  videoUrl: string;
-}
-
-interface Sermon {
   id: string;
   title: string;
   description: string;

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { SermonHero } from "../../components/sermons/SermonHero";
 import { SermonCard, type Sermon } from "../../components/sermons/SermonCard";
 import { getLatestSermons } from "@/lib/youtube";
-import { Mic2, Video as VideoIcon, ArrowUpRight } from "lucide-react";
+import { Mic2, Video as VideoIcon } from 'lucide-react';
 
 // This will be replaced with API data
 const mockSermons: Sermon[] = [];

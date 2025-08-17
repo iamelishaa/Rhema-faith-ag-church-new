@@ -19,7 +19,7 @@ type SermonCardProps = {
 };
 
 export function SermonCard({ sermon }: SermonCardProps) {
-  const { id, title, description, thumbnail, publishedAt, duration, viewCount } = sermon;
+  const { id, title, description, thumbnail, publishedAt, duration } = sermon;
   const videoId = sermon.videoId || id; // Use videoId if available, otherwise use id
   return (
     <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-all duration-300">

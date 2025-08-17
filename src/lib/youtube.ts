@@ -116,9 +116,10 @@ export async function getLatestSermons(
       items,
       nextPageToken: playlistData.nextPageToken,
     };
-  } catch (error) {
-    console.error("Error fetching YouTube videos:", error);
-    return { items: [] };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error in getLatestSermons:', errorMessage);
+    return { items: [], nextPageToken: undefined };
   }
 }
 
