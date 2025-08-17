@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IMAGES } from "@/lib/images";
-import { YouTubeVideo } from "@/lib/youtube";
-import {
+import { 
   ArrowRight,
   ArrowUpRight,
   ChevronRight,
@@ -16,11 +15,35 @@ import {
   Users,
   Music,
   BookOpen,
-  Video,
+  Video as VideoIcon,
   Mic2,
   ArrowRightCircle,
   Calendar,
+  Clock,
+  Phone,
+  Send,
+  Check,
+  X,
+  Loader2
 } from "lucide-react";
+
+interface YouTubeVideo {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  publishedAt: string;
+  videoUrl: string;
+}
+
+interface Sermon {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  publishedAt: string;
+  videoUrl: string;
+}
 
 // YouTube API integration
 const fetchSermons = async (): Promise<YouTubeVideo[]> => {
@@ -434,7 +457,7 @@ export default function Home() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <Video className="w-12 h-12 text-gray-400" />
+                        <VideoIcon className="w-12 h-12 text-gray-400" />
                       </div>
                     )}
                   </div>
@@ -522,7 +545,7 @@ export default function Home() {
                   {role.icon === "Ushers" && <Users className="w-8 h-8" />}
                   {role.icon === "Worship" && <Music className="w-8 h-8" />}
                   {role.icon === "Kids" && <BookOpen className="w-8 h-8" />}
-                  {role.icon === "Tech" && <Video className="w-8 h-8" />}
+                  {role.icon === "Tech" && <VideoIcon className="w-8 h-8" />}
                 </div>
 
                 {/* Content */}
