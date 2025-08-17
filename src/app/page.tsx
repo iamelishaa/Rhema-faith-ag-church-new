@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import pastorFamilyImage from "@/assets/pastor-family.jpg";
-import pastorImage from "@/assets/pastor.png";
+import { IMAGES } from "@/lib/images";
 import { YouTubeVideo } from "@/lib/youtube";
 import {
   ArrowRight,
@@ -79,7 +78,7 @@ export default function Home() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src={pastorImage}
+            src={IMAGES.pastor}
             alt="Pastor"
             fill
             priority
@@ -87,6 +86,11 @@ export default function Home() {
             className="object-cover object-center sm:object-right opacity-90"
             style={{
               objectFit: "cover",
+            }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = IMAGES.placeholder;
+              target.onerror = null;
             }}
           />
         </div>
@@ -493,12 +497,17 @@ export default function Home() {
           {/* Image Section */}
           <div className="flex justify-center lg:justify-end">
             <Image
-              src={pastorFamilyImage}
+              src={IMAGES.pastorFamily}
               alt="Pastor and family"
               width={500}
               height={500}
               className="rounded-2xl shadow-lg object-cover"
               priority
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = IMAGES.placeholder;
+                target.onerror = null;
+              }}
             />
           </div>
         </div>

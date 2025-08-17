@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import pastorFamily from "@/assets/pastor-family.jpg";
-import { Button } from "@/components/ui/button"; // make sure shadcn/ui Button is imported
+import { Button } from "@/components/ui/button";
+import { IMAGES } from "@/lib/images";
 
 export default function About() {
   return (
@@ -89,11 +89,16 @@ export default function About() {
 
           <div className="mt-8 flex justify-center">
             <Image
-              src={pastorFamily}
+              src={IMAGES.pastorFamily}
               alt="Pastor R. Prabhu and Kavitha Prabhu"
               className="rounded-xl shadow-lg object-cover"
               width={800}
               height={500}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = IMAGES.placeholder;
+                target.onerror = null;
+              }}
             />
           </div>
 

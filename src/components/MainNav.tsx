@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
-import churchLogo from "@/assets/logo.png";
-import profileImage from "@/assets/profile.png";
+import { IMAGES } from "@/lib/images";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -39,7 +38,7 @@ export function MainNav() {
           >
             <div className="flex-shrink-0">
               <Image
-                src={churchLogo}
+                src={IMAGES.logo}
                 alt="Rhema Faith AG Church Logo"
                 width={43}
                 height={43}
@@ -78,7 +77,7 @@ export function MainNav() {
             <div className="ml-4">
               <Link href="/profile" className="block">
                 <Avatar
-                  src={profileImage.src}
+                  src={IMAGES.profile}
                   alt="User Profile"
                   className="h-6.5 w-6.5 hover:opacity-80 transition-opacity"
                 />
@@ -92,7 +91,7 @@ export function MainNav() {
             <div className="mr-2">
               <Link href="/profile" className="block">
                 <Avatar
-                  src={profileImage.src}
+                  src={IMAGES.profile}
                   alt="User Profile"
                   className="h-10 w-10 hover:opacity-80 transition-opacity"
                 />
