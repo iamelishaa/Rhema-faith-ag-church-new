@@ -3,6 +3,29 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { VideoItem, fetchLatestVideos } from "@/lib/youtubeRSS";
+
+function cleanTitle(title: string): string {
+  // Remove common patterns and clean up the title
+  return (
+    title
+      // Remove LIVE and any following |
+      .replace(/^\s*LIVE\s*\|?\s*/i, "")
+      // Remove everything after the last | if it contains 'WORSHIP & WORD OF GOD BY'
+      .replace(/\s*\|\s*WORSHIP & WORD OF GOD BY.*$/i, "")
+      // Remove any remaining | and trim whitespace
+      .replace(/\|/g, "")
+      .trim()
+      // Capitalize first letter of each word
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+      // Limit length to 50 characters
+      .substring(0, 50)
+      .trim()
+  );
+}
 import { Button } from "@/components/ui/button";
 import { IMAGES } from "@/lib/images";
 import {
@@ -147,7 +170,7 @@ const fetchSermons = async (): Promise<YouTubeVideo[]> => {
 };
 
 export default function Home() {
-  const [sermons, setSermons] = useState<YouTubeVideo[]>([]);
+  const [sermons, setSermons] = useState<VideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,9 +180,14 @@ export default function Home() {
       setError(null);
 
       try {
-        console.log("Loading sermons...");
-        const data = await fetchSermons();
+        console.log("Loading sermons from RSS...");
+        const data = await fetchLatestVideos("UCfGHCtW5XlkY78l97_Rwu4Q", 3);
         console.log("Sermons loaded:", data);
+        console.log(`Number of videos received: ${data.length}`);
+        console.log(
+          "Video IDs:",
+          data.map((v) => v.id)
+        );
 
         if (data.length === 0) {
           setError(
@@ -167,9 +195,12 @@ export default function Home() {
           );
         }
 
-        setSermons(data);
+        // Ensure we only keep the first 3 videos
+        const limitedData = data.slice(0, 3);
+        console.log(`After limiting: ${limitedData.length} videos`);
+        setSermons(limitedData);
       } catch (err) {
-        console.error("Error in loadSermons:", err);
+        console.error("Error loading sermons:", err);
         setError(
           "Unable to load sermons at this time. Please check our YouTube channel for the latest messages."
         );
@@ -178,10 +209,7 @@ export default function Home() {
       }
     };
 
-    // Only attempt to load if we haven't already loaded or if there was an error
-    if (sermons.length === 0 && !error) {
-      loadSermons();
-    }
+    loadSermons();
   }, [sermons.length, error]);
 
   if (isLoading) {
@@ -447,32 +475,48 @@ export default function Home() {
             </div>
           ) : (
             <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {(sermons || []).slice(0, 3).map((sermon) => (
+              {sermons.map((sermon) => (
                 <div
                   key={sermon.id}
-                  className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg  transition-shadow duration-300"
+                  className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="relative h-56 w-full bg-gray-100">
-                    {sermon.thumbnail ? (
-                      <Image
-                        src={sermon.thumbnail}
-                        alt={sermon.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <VideoIcon className="w-12 h-12 text-gray-400" />
+                    <Image
+                      src={sermon.thumbnail}
+                      alt={sermon.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-black ml-1"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
                       </div>
-                    )}
+                    </div>
                   </div>
                   <div className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                      {cleanTitle(sermon.title)}
+                    </h3>
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      <Calendar className="w-4 h-4 mr-1.5" />
+                      {new Date(sermon.published).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
                     <a
                       href={`https://www.youtube.com/watch?v=${sermon.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center text-[#282828] dark:text-[#282828] hover:text-black font-medium gap-1 transition-colors duration-200"
+                      className="mt-2 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium gap-1 transition-colors duration-200"
                     >
                       Watch on YouTube
                       <ArrowUpRight className="w-4 h-4" />

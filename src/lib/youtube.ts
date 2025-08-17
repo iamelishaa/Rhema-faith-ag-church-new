@@ -59,9 +59,11 @@ export interface YouTubeVideo {
   viewCount: string;
 }
 
-export async function getLatestSermons(
-  pageToken?: string
-): Promise<{ items: YouTubeVideo[]; nextPageToken?: string }> {
+export async function getLatestSermons(pageToken?: string): Promise<{
+  items: YouTubeVideo[];
+  nextPageToken?: string;
+  error?: Error;
+}> {
   // Return empty array if YouTube API is not properly configured
   if (!isConfigured()) {
     console.warn(
@@ -72,22 +74,18 @@ export async function getLatestSermons(
 
   try {
     if (!YOUTUBE_API_KEY) {
-      throw new Error('YouTube API key is not configured');
     }
-    
-    if (!CHANNEL_ID) {
-      throw new Error('YouTube Channel ID is not configured');
-    }
-    
-    // First, get the uploads playlist ID
+
+    // First, get the uploads playlist ID from the channel
     const channelResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${YOUTUBE_API_KEY}`
     );
-    
+
     if (!channelResponse.ok) {
       const errorData = await channelResponse.json().catch(() => ({}));
       throw new Error(
-        `YouTube API error: ${channelResponse.status} ${channelResponse.statusText} - ${JSON.stringify(errorData.error || {})}`
+        `YouTube API error: ${channelResponse.status} ${channelResponse.statusText}. ` +
+          `${errorData.error?.message || ""}`.trim()
       );
     }
 
@@ -123,12 +121,12 @@ export async function getLatestSermons(
     const videosResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
     );
-    
+
     if (!videosResponse.ok) {
       throw new Error(`YouTube API error: ${videosResponse.statusText}`);
     }
-    
-    const videosData = await videosResponse.json() as {
+
+    const videosData = (await videosResponse.json()) as {
       items: YouTubeVideoItem[];
     };
 
@@ -173,11 +171,13 @@ export async function getLatestSermons(
       items,
       nextPageToken: playlistData.nextPageToken,
     };
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    console.error("Error in getLatestSermons:", errorMessage);
-    return { items: [], nextPageToken: undefined };
+  } catch (error) {
+    console.error("Error fetching latest sermons:", error);
+    return {
+      items: [],
+      error:
+        error instanceof Error ? error : new Error("Unknown error occurred"),
+    };
   }
 }
 

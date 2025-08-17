@@ -1,219 +1,157 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { SermonHero } from "../../components/sermons/SermonHero";
-import { SermonCard, type Sermon } from "../../components/sermons/SermonCard";
-import { getLatestSermons } from "@/lib/youtube";
-import { Mic2, Video as VideoIcon } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { FiMapPin } from "react-icons/fi";
+import { VideoItem, fetchLatestVideos } from "@/lib/youtubeRSS";
 
-// This will be replaced with API data
-const mockSermons: Sermon[] = [];
+function cleanTitle(title: string): string {
+  // Remove common patterns and clean up the title
+  return (
+    title
+      // Remove LIVE and any following |
+      .replace(/^\s*LIVE\s*\|?\s*/i, "")
+      // Remove everything after the last | if it contains 'WORSHIP & WORD OF GOD BY'
+      .replace(/\s*\|\s*WORSHIP & WORD OF GOD BY.*$/i, "")
+      // Remove any remaining | and trim whitespace
+      .replace(/\|/g, "")
+      .trim()
+      // Capitalize first letter of each word
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+      .trim()
+  );
+}
+
+const SERVICE_SCHEDULE = [
+  { day: "Sunday", name: "Morning Service", time: "10:00 AM" },
+  { day: "Wednesday", name: "Bible Study", time: "7:00 PM" },
+  { day: "Friday", name: "Prayer Meeting", time: "7:00 PM" },
+];
+
+const CHANNEL_ID = "UCfGHCtW5XlkY78l97_Rwu4Q";
 
 export default function SermonsPage() {
-  const [sermons, setSermons] = useState<Sermon[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState<string>("");
+  const [currentTitle, setCurrentTitle] = useState<string>("Live Now");
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [pageToken, setPageToken] = useState<string | null>(null);
-  const [isConfigured, setIsConfigured] = useState(true);
-  const observer = useRef<IntersectionObserver | null>(null);
-  
-  const loadSermons = useCallback(async (loadMore = false) => {
-    if (loadMore) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
-    }
 
-    try {
-      const data = await getLatestSermons(loadMore && pageToken ? pageToken : undefined);
-
-      // Check if we got an error response (but still 200 status)
-      if ('error' in data) {
-        console.warn('YouTube API not configured:', data.error);
-        setIsConfigured(false);
-        setSermons([]);
-        setError('Sermon videos are not available at this time.');
-        return;
-      }
-      
-      if (loadMore) {
-        setSermons(prev => [...prev, ...data.items]);
-      } else {
-        setSermons(data.items);
-      }
-      
-      setHasMore(!!data.nextPageToken);
-      setPageToken(data.nextPageToken || null);
-      setError(null);
-      setIsConfigured(true);
-    } catch (err) {
-      console.error('Error loading sermons:', err);
-      setIsConfigured(false);
-      setError('Failed to load sermons. Please try again later.');
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [pageToken]);
-
-  const lastSermonRef = useCallback((node: HTMLDivElement | null) => {
-    if (loading || loadingMore) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadSermons(true);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [loading, loadingMore, hasMore, loadSermons]);
-      
-  // Initial fetch
   useEffect(() => {
-    const fetchSermons = async () => {
+    const loadVideos = async () => {
       try {
-        setLoading(true);
-        const { items, nextPageToken } = await getLatestSermons();
-        setSermons(items);
-        setPageToken(nextPageToken || null);
-        setHasMore(!!nextPageToken);
-        setError(null);
+        setIsLoading(true);
+        const latestVideos = await fetchLatestVideos(CHANNEL_ID, 6);
+        setVideos(latestVideos);
+
+        // Set the first video as default
+        if (latestVideos.length > 0) {
+          setCurrentVideoId(latestVideos[0].id);
+          setCurrentTitle(latestVideos[0].title);
+        }
       } catch (err) {
-        console.error("Failed to fetch sermons:", err);
-        setError("Failed to load sermons. Please try again later.");
-        // Fallback to mock data if API fails
-        setSermons(mockSermons);
+        console.error("Failed to load videos:", err);
+        setError("Failed to load videos. Please try again later.");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchSermons();
+    loadVideos();
   }, []);
 
-  // Get latest sermon for hero section
-  const latestSermon = sermons[0] || null;
+  const handleVideoClick = (video: VideoItem) => {
+    setCurrentVideoId(video.id);
+    setCurrentTitle(cleanTitle(video.title));
+  };
 
-  // Sort sermons by newest first
-  const sortedSermons = [...sermons].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
-  const recentSermons = sortedSermons.slice(1); // All sermons except the first one
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
+  // Clean video titles before rendering
+  const cleanedVideos = videos.map((video) => ({
+    ...video,
+    title: cleanTitle(video.title),
+  }));
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section with Latest Sermon */}
-      {latestSermon && <SermonHero latestSermon={latestSermon} />}
+    <div className="min-h-screen bg-gray-900 text-white">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Hero */}
 
-      {/* Page Title */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Sermons
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-            Watch and listen to our latest messages
-          </p>
-
-          {error && (
-            <div
-              className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6"
-              role="alert"
-            >
-              <p className="font-bold">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
-
-          {sermons.length === 0 && !loading && !error && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6">
-              <p>No sermons found. Please check back later.</p>
-            </div>
-          )}
+        {/* Video + Service Info */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Video */}
+          <div
+            className="flex-1 relative bg-black rounded-xl overflow-hidden shadow-2xl"
+            style={{ paddingTop: "56.25%" }}
+          >
+            <iframe
+              src={`https://www.youtube.com/embed/${
+                currentVideoId || `live_stream?channel=${CHANNEL_ID}`
+              }?autoplay=0&mute=1&rel=0`}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={currentTitle}
+            />
+          </div>
         </div>
 
-      </div>
-
-      {/* Sermons Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        {recentSermons.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recentSermons.map((sermon, index) => {
-              if (recentSermons.length === index + 1) {
-                return (
-                  <div ref={lastSermonRef} key={sermon.id}>
-                    <SermonCard sermon={sermon} />
-                  </div>
-                );
-              }
-              return <SermonCard key={sermon.id} sermon={sermon} />;
-            })}
-            {loadingMore && (
-              <div className="col-span-full flex justify-center my-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            {isConfigured ? (
-              <p className="text-gray-600">
-                No sermons found matching your criteria.
-              </p>
-            ) : (
-              <div className="text-center py-12 px-4">
-                <div className="max-w-2xl mx-auto bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <VideoIcon className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">
-                        Sermon videos are currently unavailable. Please check back later or visit our 
-                        <a 
-                          href="https://www.youtube.com/@RhemaFaithAGChurch" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="font-medium underline text-yellow-700 hover:text-yellow-600"
+        {/* Recent Sermons */}
+        <section className="py-8">
+          <h2 className="text-3xl font-bold text-white mb-8">Recent Sermons</h2>
+          {isLoading ? (
+            <div className="text-center text-gray-400">Loading sermons...</div>
+          ) : error ? (
+            <div className="text-center text-red-400">{error}</div>
+          ) : videos.length === 0 ? (
+            <div className="text-center text-gray-400">
+              No sermons available at the moment.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cleanedVideos.map((video) => (
+                <div
+                  key={video.id}
+                  className="group flex flex-col cursor-pointer rounded-lg overflow-hidden bg-gray-800/50 hover:bg-gray-800/80 transition-colors"
+                  onClick={() => handleVideoClick(video)}
+                >
+                  <div className="relative w-full aspect-video">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-black ml-1"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          YouTube channel
-                        </a> 
-                        directly.
-                      </p>
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                      {video.title}
+                    </h3>
+                    <div className="text-gray-400 text-sm">
+                      {new Date(video.published).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* CTA */}
-      <div className="py-12 text-center bg-gray-100 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Want to see more sermons?
-          </h2>
-          <a
-            href="https://www.youtube.com/channel/UCfGHCtW5XlkY78l97_Rwu4Q"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors"
-          >
-            View More on YouTube
-          </a>
-        </div>
-      </div>
-    </main>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
   );
 }

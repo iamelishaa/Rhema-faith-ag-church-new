@@ -22,7 +22,6 @@ const navItems = [
   { name: "About", href: "/about" },
   { name: "Sermons", href: "/sermons" },
   { name: "Ministries", href: "/ministries" },
-  { name: "Online", href: "/online" },
   { name: "Giving", href: "/giving" },
 ];
 
@@ -47,7 +46,7 @@ export function MainNav() {
                 height={43}
                 className="h-10 w-auto"
                 priority
-                unoptimized={process.env.NODE_ENV === 'production'}
+                unoptimized={process.env.NODE_ENV === "production"}
               />
             </div>
             <div className="flex flex-col leading-tight">
