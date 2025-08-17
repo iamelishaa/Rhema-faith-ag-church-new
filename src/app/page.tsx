@@ -187,7 +187,7 @@ export default function Home() {
             alt="Pastor"
             fill
             priority
-            quality={100}
+            unoptimized={true}
             className="object-cover object-center sm:object-right opacity-90"
             style={{
               objectFit: "cover",
@@ -612,6 +612,7 @@ export default function Home() {
               alt="Pastor and family"
               width={500}
               height={500}
+              unoptimized={true}
               className="rounded-2xl shadow-lg object-cover"
               priority
               onError={(e) => {

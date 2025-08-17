@@ -1,10 +1,10 @@
 // Helper function to get the correct image path
 export const getImagePath = (imageName: string): string => {
-  // In production, use the public path
-  if (process.env.NODE_ENV === 'production') {
-    return `/_next/static/media/${imageName.replace(/\.[^/.]+$/, '')}.${imageName.split('.').pop()}`;
+  // In development, use the path from the public directory
+  if (process.env.NODE_ENV === 'development') {
+    return `/images/${imageName}`;
   }
-  // In development, use the public path
+  // In production, use the path where images are copied during build
   return `/images/${imageName}`;
 };
 
