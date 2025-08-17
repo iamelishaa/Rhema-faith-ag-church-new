@@ -18,17 +18,7 @@ export default function SermonsPage() {
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [isConfigured, setIsConfigured] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastSermonRef = useCallback((node: HTMLDivElement | null) => {
-    if (loading || loadingMore) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadSermons(true);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [loading, loadingMore, hasMore]);
-
+  
   const loadSermons = useCallback(async (loadMore = false) => {
     if (loadMore) {
       setLoadingMore(true);
@@ -38,7 +28,7 @@ export default function SermonsPage() {
 
     try {
       const data = await getLatestSermons(loadMore && pageToken ? pageToken : undefined);
-      
+
       // Check if we got an error response (but still 200 status)
       if ('error' in data) {
         console.warn('YouTube API not configured:', data.error);
@@ -68,6 +58,17 @@ export default function SermonsPage() {
     }
   }, [pageToken]);
 
+  const lastSermonRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadSermons(true);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore, loadSermons]);
+      
   // Initial fetch
   useEffect(() => {
     const fetchSermons = async () => {

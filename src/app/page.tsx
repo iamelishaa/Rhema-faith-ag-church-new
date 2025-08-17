@@ -9,9 +9,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   Calendar,
-  Clock,
   Mail,
-  Phone,
   Video as VideoIcon,
   Play,
   Users,
@@ -91,8 +89,27 @@ const fetchSermons = async (): Promise<YouTubeVideo[]> => {
       return [];
     }
     
+    // Define interface for YouTube API response item
+    interface YouTubePlaylistItem {
+      snippet: {
+        title: string;
+        description: string;
+        publishedAt: string;
+        thumbnails: {
+          maxres?: { url: string };
+          standard?: { url: string };
+          high?: { url: string };
+          medium?: { url: string };
+          default?: { url: string };
+        };
+        resourceId: {
+          videoId: string;
+        };
+      };
+    }
+
     // Transform the response to match our component's expected format
-    const sermons = videosData.items.map((item: any) => {
+    const sermons = (videosData.items as YouTubePlaylistItem[]).map((item) => {
       const videoId = item.snippet.resourceId.videoId;
       const thumbnails = item.snippet.thumbnails;
       
@@ -300,7 +317,7 @@ export default function Home() {
                   variant="link"
                   className="p-0 h-auto text-gray-600 hover:text-gray-800 text-lg font-medium group flex items-center gap-1"
                 >
-                  Explore Children's Ministry
+                  Explore Children&apos;s Ministry
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>

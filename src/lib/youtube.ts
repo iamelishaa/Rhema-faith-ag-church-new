@@ -1,19 +1,48 @@
+// Define types for YouTube API responses
+interface YouTubePlaylistItem {
+  snippet: {
+    resourceId: {
+      videoId: string;
+    };
+  };
+}
+
+interface YouTubeVideoItem {
+  id: string;
+  snippet: {
+    title: string;
+    description: string;
+    publishedAt: string;
+    thumbnails: {
+      default?: { url: string };
+      medium?: { url: string };
+      high?: { url: string };
+      standard?: { url: string };
+      maxres?: { url: string };
+    };
+  };
+  contentDetails: {
+    duration: string;
+  };
+  statistics: {
+    viewCount: string;
+  };
+}
+
 // Get YouTube API key from environment variables (with fallback for development)
 const YOUTUBE_API_KEY =
-  process.env.YOUTUBE_API_KEY || 
-  process.env.NEXT_PUBLIC_YOUTUBE_API_KEY ||
-  ''; // Empty string as fallback to prevent undefined errors
+  process.env.YOUTUBE_API_KEY || process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || ""; // Empty string as fallback to prevent undefined errors
 
 // Get YouTube Channel ID from environment variables
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || '';
+const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || "";
 const MAX_RESULTS = 7; // Number of videos to fetch
 
 // Check if required environment variables are set
 const isConfigured = () => {
   if (!YOUTUBE_API_KEY || !CHANNEL_ID) {
     console.warn(
-      'YouTube API is not properly configured. ' +
-      'Please set YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID environment variables.'
+      "YouTube API is not properly configured. " +
+        "Please set YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID environment variables."
     );
     return false;
   }
@@ -35,26 +64,39 @@ export async function getLatestSermons(
 ): Promise<{ items: YouTubeVideo[]; nextPageToken?: string }> {
   // Return empty array if YouTube API is not properly configured
   if (!isConfigured()) {
-    console.warn('YouTube API is not properly configured. Returning empty sermon list.');
+    console.warn(
+      "YouTube API is not properly configured. Returning empty sermon list."
+    );
     return { items: [] };
   }
 
   try {
+    if (!YOUTUBE_API_KEY) {
+      throw new Error('YouTube API key is not configured');
+    }
+    
+    if (!CHANNEL_ID) {
+      throw new Error('YouTube Channel ID is not configured');
+    }
+    
     // First, get the uploads playlist ID
     const channelResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${YOUTUBE_API_KEY}`
     );
     
     if (!channelResponse.ok) {
-      throw new Error(`YouTube API error: ${channelResponse.statusText}`);
+      const errorData = await channelResponse.json().catch(() => ({}));
+      throw new Error(
+        `YouTube API error: ${channelResponse.status} ${channelResponse.statusText} - ${JSON.stringify(errorData.error || {})}`
+      );
     }
-    
+
     const channelData = await channelResponse.json();
-    
+
     if (!channelData.items || channelData.items.length === 0) {
-      throw new Error('No channel found with the provided CHANNEL_ID');
+      throw new Error("No channel found with the provided CHANNEL_ID");
     }
-    
+
     const uploadsPlaylistId =
       channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
@@ -66,59 +108,75 @@ export async function getLatestSermons(
     url += `&key=${YOUTUBE_API_KEY}`;
 
     const playlistResponse = await fetch(url);
-    const playlistData = await playlistResponse.json();
+    if (!playlistResponse.ok) {
+      throw new Error(`YouTube API error: ${playlistResponse.statusText}`);
+    }
+    const playlistData = (await playlistResponse.json()) as {
+      items: YouTubePlaylistItem[];
+      nextPageToken?: string;
+    };
 
     // Get video details including duration
-    const videoIds = playlistData.items
-      .map((item: any) => item.snippet.resourceId.videoId)
+    const videoIds = (playlistData.items as YouTubePlaylistItem[])
+      .map((item) => item.snippet.resourceId.videoId)
       .join(",");
     const videosResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
     );
-    const videosData = await videosResponse.json();
+    
+    if (!videosResponse.ok) {
+      throw new Error(`YouTube API error: ${videosResponse.statusText}`);
+    }
+    
+    const videosData = await videosResponse.json() as {
+      items: YouTubeVideoItem[];
+    };
 
-    // Format the response
-    const items = videosData.items.map((video: any) => {
-      // Use maxres thumbnail if available, otherwise fall back to high
-      // Ensure we're using HTTPS and the correct domain for YouTube thumbnails
-      let thumbnail = 
-        video.snippet.thumbnails.maxres?.url ||
-        video.snippet.thumbnails.high?.url ||
-        video.snippet.thumbnails.standard?.url ||
-        video.snippet.thumbnails.medium?.url ||
-        video.snippet.thumbnails.default?.url ||
-        `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
-      
-      // Ensure the URL uses HTTPS and the correct domain
-      if (thumbnail) {
-        thumbnail = thumbnail
-          .replace('http://', 'https://')
-          .replace('i1.ytimg.com', 'i.ytimg.com')
-          .replace('i2.ytimg.com', 'i.ytimg.com')
-          .replace('i3.ytimg.com', 'i.ytimg.com')
-          .replace('i4.ytimg.com', 'i.ytimg.com');
+    // Format the response with proper type safety
+    const items: YouTubeVideo[] = videosData.items.map(
+      (video: YouTubeVideoItem) => {
+        // Use maxres thumbnail if available, otherwise fall back to high
+        // Ensure we're using HTTPS and the correct domain for YouTube thumbnails
+        let thumbnail =
+          video.snippet.thumbnails.maxres?.url ||
+          video.snippet.thumbnails.high?.url ||
+          video.snippet.thumbnails.standard?.url ||
+          video.snippet.thumbnails.medium?.url ||
+          video.snippet.thumbnails.default?.url ||
+          `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+
+        // Ensure the URL uses HTTPS and the correct domain
+        if (thumbnail) {
+          thumbnail = thumbnail
+            .replace("http://", "https://")
+            .replace("i1.ytimg.com", "i.ytimg.com")
+            .replace("i2.ytimg.com", "i.ytimg.com")
+            .replace("i3.ytimg.com", "i.ytimg.com")
+            .replace("i4.ytimg.com", "i.ytimg.com");
+        }
+
+        return {
+          id: video.id,
+          title: cleanTitle(video.snippet.title),
+          description: video.snippet.description || "", // Ensure description is always a string
+          thumbnail,
+          publishedAt: video.snippet.publishedAt,
+          duration: formatDuration(video.contentDetails.duration),
+          viewCount: formatViewCount(video.statistics.viewCount),
+          // Keep original title in case it's needed
+          originalTitle: video.snippet.title,
+        };
       }
-
-      return {
-        id: video.id,
-        title: cleanTitle(video.snippet.title),
-        description: video.snippet.description || "", // Ensure description is always a string
-        thumbnail,
-        publishedAt: video.snippet.publishedAt,
-        duration: formatDuration(video.contentDetails.duration),
-        viewCount: formatViewCount(video.statistics.viewCount),
-        // Keep original title in case it's needed
-        originalTitle: video.snippet.title,
-      };
-    });
+    );
 
     return {
       items,
       nextPageToken: playlistData.nextPageToken,
     };
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in getLatestSermons:', errorMessage);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in getLatestSermons:", errorMessage);
     return { items: [], nextPageToken: undefined };
   }
 }
