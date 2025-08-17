@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IMAGES } from "@/lib/images";
+import SafeImage from "@/components/ui/SafeImage";
 
 export default function About() {
   return (
@@ -88,17 +88,13 @@ export default function About() {
           </h2>
 
           <div className="mt-8 flex justify-center">
-            <Image
+            <SafeImage
               src={IMAGES.pastorFamily}
               alt="Pastor R. Prabhu and Kavitha Prabhu"
               className="rounded-xl shadow-lg object-cover"
               width={800}
               height={500}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = IMAGES.placeholder;
-                target.onerror = null;
-              }}
+              priority
             />
           </div>
 

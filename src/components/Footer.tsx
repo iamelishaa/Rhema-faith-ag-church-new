@@ -133,13 +133,13 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 flex flex-row items-center justify-between w-full">
-          <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+        <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left w-full sm:w-auto">
             © {new Date().getFullYear()} Rhema Faith AG Church. All rights reserved.
           </p>
           
           {/* Social Links */}
-          <div className="flex space-x-4 sm:space-x-6">
+          <div className="flex flex-wrap justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             {/* Facebook */}
             <a
               href="https://www.facebook.com/rhema.faithag/"

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -10,6 +11,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -26,6 +28,7 @@ const navItems = [
 
 export function MainNav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -98,7 +101,7 @@ export function MainNav() {
                 <span className="sr-only">Profile</span>
               </Link>
             </div>
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
@@ -109,18 +112,20 @@ export function MainNav() {
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <nav className="flex flex-col gap-4 mt-8">
                   {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "block py-2 px-4 rounded-lg transition-colors",
-                        pathname === item.href
-                          ? "bg-muted font-medium"
-                          : "hover:bg-muted/50"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
+                    <SheetClose key={`close-${item.href}`} asChild>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "block py-2 px-4 rounded-lg transition-colors",
+                          pathname === item.href
+                            ? "bg-muted font-medium"
+                            : "hover:bg-muted/50"
+                        )}
+                        onClick={() => setOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </SheetClose>
                   ))}
                 </nav>
               </SheetContent>
