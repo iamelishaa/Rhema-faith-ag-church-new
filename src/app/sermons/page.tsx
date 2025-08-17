@@ -15,35 +15,57 @@ export default function SermonsPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [pageToken, setPageToken] = useState<string | null>(null);
+  const [isConfigured, setIsConfigured] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastSermonRef = useCallback((node: HTMLDivElement | null) => {
     if (loading || loadingMore) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        loadMoreSermons();
+        loadSermons(true);
       }
     });
     if (node) observer.current.observe(node);
   }, [loading, loadingMore, hasMore]);
 
-  const loadMoreSermons = async () => {
-    if (loading || loadingMore) return;
-    
-    try {
+  const loadSermons = useCallback(async (loadMore = false) => {
+    if (loadMore) {
       setLoadingMore(true);
-      const { items, nextPageToken } = await getLatestSermons(pageToken || undefined);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const data = await getLatestSermons(loadMore && pageToken ? pageToken : undefined);
       
-      setSermons(prev => [...prev, ...items]);
-      setPageToken(nextPageToken || null);
-      setHasMore(!!nextPageToken);
+      // Check if we got an error response (but still 200 status)
+      if ('error' in data) {
+        console.warn('YouTube API not configured:', data.error);
+        setIsConfigured(false);
+        setSermons([]);
+        setError('Sermon videos are not available at this time.');
+        return;
+      }
+      
+      if (loadMore) {
+        setSermons(prev => [...prev, ...data.items]);
+      } else {
+        setSermons(data.items);
+      }
+      
+      setHasMore(!!data.nextPageToken);
+      setPageToken(data.nextPageToken || null);
+      setError(null);
+      setIsConfigured(true);
     } catch (err) {
-      console.error("Failed to fetch more sermons:", err);
-      setError("Failed to load more sermons. Please try again later.");
+      console.error('Error loading sermons:', err);
+      setIsConfigured(false);
+      setError('Failed to load sermons. Please try again later.');
     } finally {
+      setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [pageToken]);
 
   // Initial fetch
   useEffect(() => {
@@ -84,7 +106,6 @@ export default function SermonsPage() {
       </div>
     );
   }
-
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -142,9 +163,37 @@ export default function SermonsPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600">
-              No sermons found matching your criteria.
-            </p>
+            {isConfigured ? (
+              <p className="text-gray-600">
+                No sermons found matching your criteria.
+              </p>
+            ) : (
+              <div className="text-center py-12 px-4">
+                <div className="max-w-2xl mx-auto bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">
+                        Sermon videos are currently unavailable. Please check back later or visit our 
+                        <a 
+                          href="https://www.youtube.com/@RhemaFaithAGChurch" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-medium underline text-yellow-700 hover:text-yellow-600"
+                        >
+                          YouTube channel
+                        </a> 
+                        directly.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

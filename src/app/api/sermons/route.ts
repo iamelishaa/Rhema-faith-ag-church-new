@@ -1,15 +1,23 @@
-import { NextResponse } from 'next/server';
-import { getLatestSermons } from '@/lib/youtube';
+// This API route is not available in static export
+// We'll handle the data fetching directly in the page component
 
-export async function GET() {
-  try {
-    const sermons = await getLatestSermons();
-    return NextResponse.json(sermons);
-  } catch (error) {
-    console.error('Error in API route:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch sermons' },
-      { status: 500 }
-    );
-  }
+import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-static';
+
+// Simple response for static export
+export function GET() {
+  return NextResponse.json(
+    { 
+      items: [],
+      message: 'Sermons are not available in the static export. Please check our YouTube channel directly.'
+    },
+    { 
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    }
+  );
 }

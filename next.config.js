@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
+
 const nextConfig = {
   reactStrictMode: false, // Disabled for debugging
   
@@ -10,6 +17,8 @@ const nextConfig = {
 
   // Image optimization
   images: {
+    // Disable image optimization API for static export
+    unoptimized: true,
     // Allow all domains in development, but restrict in production for security
     domains: process.env.NODE_ENV === 'development' 
       ? ['*'] 
@@ -23,51 +32,37 @@ const nextConfig = {
           'rhema-faith-ag-church.netlify.app',
           'localhost',
         ],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'i.ytimg.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'rhema-faith-ag-church.netlify.app',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-    // Optimize for both mobile and desktop
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    // Common image sizes for different use cases
+    // Disable remote patterns for static export
+    remotePatterns: [],
+    // Basic device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    // Basic image sizes for responsive images
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Enable WebP for better compression
-    formats: ['image/webp'],
-    // Cache images for 1 hour (in seconds)
-    minimumCacheTTL: 3600,
-    // Enable static image imports
-    disableStaticImages: false,
-    // Enable content security policy for images
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // Enable unoptimized images for static export
-    unoptimized: process.env.NODE_ENV === 'production',
+    // Disable WebP for static export
+    formats: [],
+    // Disable cache for static export
+    minimumCacheTTL: 0,
+    // Disable static image imports for static export
+    disableStaticImages: true,
+    // Disable SVG optimization for static export
+    dangerouslyAllowSVG: false,
+    // Disable content security policy for static export
+    contentSecurityPolicy: "",
   },
   
   // Static export configuration
   output: 'export',
   assetPrefix: process.env.NODE_ENV === 'production' ? '/_next/static' : undefined,
+  
+  // Generate build ID for production
+  generateBuildId: async () => {
+    return process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || 'build-' + Date.now();
+  },
 
   // Webpack configuration
   webpack: (config, { isServer, dev }) => {
     // Add custom webpack configuration here if needed
     return config;
-  },
-
-  // Build output configuration
-  output: 'standalone',
-  generateBuildId: async () => {
-    return 'build-' + Date.now();
   },
   
   // TypeScript configuration
@@ -75,18 +70,14 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Enable static HTML export
+  trailingSlash: true,
+  
+  // Disable server components for static export
+  experimental: {
+    appDir: false,
   },
+  
 };
-
-// Only enable PWA in production
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-});
 
 module.exports = withPWA(nextConfig);

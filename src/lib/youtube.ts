@@ -1,19 +1,24 @@
+// Get YouTube API key from environment variables (with fallback for development)
 const YOUTUBE_API_KEY =
-  process.env.YOUTUBE_API_KEY || process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
+  process.env.YOUTUBE_API_KEY || 
+  process.env.NEXT_PUBLIC_YOUTUBE_API_KEY ||
+  ''; // Empty string as fallback to prevent undefined errors
+
+// Get YouTube Channel ID from environment variables
+const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || '';
 const MAX_RESULTS = 7; // Number of videos to fetch
 
-if (!YOUTUBE_API_KEY) {
-  console.error(
-    "YOUTUBE_API_KEY is not defined. Please check your environment variables."
-  );
-}
-
-if (!CHANNEL_ID) {
-  console.error(
-    "YOUTUBE_CHANNEL_ID is not defined. Please check your environment variables."
-  );
-}
+// Check if required environment variables are set
+const isConfigured = () => {
+  if (!YOUTUBE_API_KEY || !CHANNEL_ID) {
+    console.warn(
+      'YouTube API is not properly configured. ' +
+      'Please set YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID environment variables.'
+    );
+    return false;
+  }
+  return true;
+};
 
 export interface YouTubeVideo {
   id: string;
@@ -28,12 +33,28 @@ export interface YouTubeVideo {
 export async function getLatestSermons(
   pageToken?: string
 ): Promise<{ items: YouTubeVideo[]; nextPageToken?: string }> {
+  // Return empty array if YouTube API is not properly configured
+  if (!isConfigured()) {
+    console.warn('YouTube API is not properly configured. Returning empty sermon list.');
+    return { items: [] };
+  }
+
   try {
     // First, get the uploads playlist ID
     const channelResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${YOUTUBE_API_KEY}`
     );
+    
+    if (!channelResponse.ok) {
+      throw new Error(`YouTube API error: ${channelResponse.statusText}`);
+    }
+    
     const channelData = await channelResponse.json();
+    
+    if (!channelData.items || channelData.items.length === 0) {
+      throw new Error('No channel found with the provided CHANNEL_ID');
+    }
+    
     const uploadsPlaylistId =
       channelData.items[0].contentDetails.relatedPlaylists.uploads;
 

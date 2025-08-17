@@ -24,16 +24,95 @@ import {
 
 // YouTube API integration
 const fetchSermons = async (): Promise<YouTubeVideo[]> => {
+  // In production with static export, return an empty array
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Running in production mode, returning empty sermons array');
+    return [];
+  }
+
   try {
-    const response = await fetch("/api/sermons");
-    if (!response.ok) {
-      throw new Error("Failed to fetch sermons");
+    console.log('Fetching sermons from YouTube API directly...');
+    
+    // In development, fetch directly from YouTube API
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+    const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
+    
+    if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
+      console.error('Missing YouTube API configuration');
+      throw new Error('YouTube API is not properly configured');
     }
-    const data = await response.json();
-    // Handle both the case where the API returns { items } and where it returns the array directly
-    return Array.isArray(data) ? data : data.items || [];
+    
+    // First, get the uploads playlist ID with more details
+    const channelResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&id=${YOUTUBE_CHANNEL_ID}&maxResults=1&key=${YOUTUBE_API_KEY}`
+    );
+    
+    if (!channelResponse.ok) {
+      const errorData = await channelResponse.json();
+      console.error('YouTube API error:', errorData);
+      throw new Error(`YouTube API error: ${channelResponse.status} ${channelResponse.statusText}`);
+    }
+    
+    const channelData = await channelResponse.json();
+    
+    if (!channelData.items || channelData.items.length === 0) {
+      throw new Error('No channel found with the provided CHANNEL_ID');
+    }
+    
+    const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+    
+    // Then, get the videos from the uploads playlist with all necessary parts
+    const videosResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/playlistItems?` + new URLSearchParams({
+        part: 'snippet,contentDetails',
+        maxResults: '10',
+        playlistId: uploadsPlaylistId,
+        key: YOUTUBE_API_KEY
+      })
+    );
+    
+    if (!videosResponse.ok) {
+      const errorData = await videosResponse.json().catch(() => ({}));
+      console.error('YouTube Videos API error:', errorData);
+      throw new Error(`YouTube API error (${videosResponse.status}): ${errorData.message || videosResponse.statusText}`);
+    }
+    
+    const videosData = await videosResponse.json();
+    
+    if (!videosData.items || !Array.isArray(videosData.items)) {
+      console.warn('No videos found or invalid response format:', videosData);
+      return [];
+    }
+    
+    // Transform the response to match our component's expected format
+    const sermons = videosData.items.map((item: any) => {
+      const videoId = item.snippet.resourceId.videoId;
+      const thumbnails = item.snippet.thumbnails;
+      
+      // Use the highest quality available thumbnail
+      const thumbnailUrl = thumbnails?.maxres?.url || 
+                          thumbnails?.standard?.url || 
+                          thumbnails?.high?.url || 
+                          thumbnails?.medium?.url || 
+                          thumbnails?.default?.url ||
+                          `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      
+      return {
+        id: videoId,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: thumbnailUrl,
+        publishedAt: item.snippet.publishedAt,
+        videoUrl: `https://www.youtube.com/watch?v=${videoId}`
+      };
+    });
+    
+    console.log('Successfully fetched', sermons.length, 'sermons');
+    return sermons;
+    
   } catch (error) {
-    console.error("Error fetching sermons:", error);
+    console.error("Error in fetchSermons:", error);
+    // Return empty array to prevent breaking the UI
     return [];
   }
 };
@@ -45,17 +124,30 @@ export default function Home() {
 
   useEffect(() => {
     const loadSermons = async () => {
+      setIsLoading(true);
+      setError(null);
+      
       try {
+        console.log('Loading sermons...');
         const data = await fetchSermons();
-        console.log("Sermons data:", {
-          data,
-          type: typeof data,
-          isArray: Array.isArray(data),
-        });
+        console.log('Sermons loaded:', data);
+        
+        if (data.length === 0) {
+          if (process.env.NODE_ENV === 'production') {
+            setError("Sermon videos are not available in the static version of the site. Please check our YouTube channel.");
+          } else {
+            setError("No sermons found. This could be because:\n" +
+                    "1. YouTube API is not properly configured\n" +
+                    "2. No videos found in the specified channel\n" +
+                    "3. Check browser console for detailed error information");
+          }
+        }
+        
         setSermons(data);
       } catch (err) {
-        setError("Failed to load sermons. Please try again later.");
-        console.error(err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        console.error('Error in loadSermons:', err);
+        setError(`Failed to load sermons: ${errorMessage}. Please check the console for more details.`);
       } finally {
         setIsLoading(false);
       }
@@ -331,14 +423,20 @@ export default function Home() {
                   key={sermon.id}
                   className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg  transition-shadow duration-300"
                 >
-                  <div className="relative h-56 w-full">
-                    <Image
-                      src={sermon.thumbnail}
-                      alt={sermon.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
+                  <div className="relative h-56 w-full bg-gray-100">
+                    {sermon.thumbnail ? (
+                      <Image
+                        src={sermon.thumbnail}
+                        alt={sermon.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Video className="w-12 h-12 text-gray-400" />
+                      </div>
+                    )}
                   </div>
                   <div className="p-6">
                     <a

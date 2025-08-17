@@ -45,8 +45,9 @@ export function MainNav() {
                 alt="Rhema Faith AG Church Logo"
                 width={43}
                 height={43}
-                className="rounded-full border-1"
+                className="h-10 w-auto"
                 priority
+                unoptimized={process.env.NODE_ENV === 'production'}
               />
             </div>
             <div className="flex flex-col leading-tight">
