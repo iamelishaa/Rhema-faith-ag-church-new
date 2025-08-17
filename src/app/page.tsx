@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IMAGES } from "@/lib/images";
-import { 
+import {
   ArrowRight,
   ArrowUpRight,
   Calendar,
@@ -15,7 +15,7 @@ import {
   Users,
   Music,
   BookOpen,
-  MapPin
+  MapPin,
 } from "lucide-react";
 
 interface YouTubeVideo {
@@ -30,59 +30,70 @@ interface YouTubeVideo {
 // YouTube API integration
 const fetchSermons = async (): Promise<YouTubeVideo[]> => {
   try {
-    console.log('Fetching sermons from YouTube API...');
-    
+    console.log("Fetching sermons from YouTube API...");
+
     // Get API keys from environment
-    const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY;
-    const YOUTUBE_CHANNEL_ID = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || process.env.YOUTUBE_CHANNEL_ID;
-    
+    const YOUTUBE_API_KEY =
+      process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY;
+    const YOUTUBE_CHANNEL_ID =
+      process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID ||
+      process.env.YOUTUBE_CHANNEL_ID;
+
     if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
-      console.warn('Missing YouTube API configuration');
-      throw new Error('YouTube API is not properly configured');
+      console.warn("Missing YouTube API configuration");
+      throw new Error("YouTube API is not properly configured");
     }
-    
+
     // First, get the uploads playlist ID with more details
     const channelResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&id=${YOUTUBE_CHANNEL_ID}&maxResults=1&key=${YOUTUBE_API_KEY}`
     );
-    
+
     if (!channelResponse.ok) {
       const errorData = await channelResponse.json();
-      console.error('YouTube API error:', errorData);
-      throw new Error(`YouTube API error: ${channelResponse.status} ${channelResponse.statusText}`);
+      console.error("YouTube API error:", errorData);
+      throw new Error(
+        `YouTube API error: ${channelResponse.status} ${channelResponse.statusText}`
+      );
     }
-    
+
     const channelData = await channelResponse.json();
-    
+
     if (!channelData.items || channelData.items.length === 0) {
-      throw new Error('No channel found with the provided CHANNEL_ID');
+      throw new Error("No channel found with the provided CHANNEL_ID");
     }
-    
-    const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
-    
+
+    const uploadsPlaylistId =
+      channelData.items[0].contentDetails.relatedPlaylists.uploads;
+
     // Then, get the videos from the uploads playlist with all necessary parts
     const videosResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlistItems?` + new URLSearchParams({
-        part: 'snippet,contentDetails',
-        maxResults: '10',
-        playlistId: uploadsPlaylistId,
-        key: YOUTUBE_API_KEY
-      })
+      `https://www.googleapis.com/youtube/v3/playlistItems?` +
+        new URLSearchParams({
+          part: "snippet,contentDetails",
+          maxResults: "10",
+          playlistId: uploadsPlaylistId,
+          key: YOUTUBE_API_KEY,
+        })
     );
-    
+
     if (!videosResponse.ok) {
       const errorData = await videosResponse.json().catch(() => ({}));
-      console.error('YouTube Videos API error:', errorData);
-      throw new Error(`YouTube API error (${videosResponse.status}): ${errorData.message || videosResponse.statusText}`);
+      console.error("YouTube Videos API error:", errorData);
+      throw new Error(
+        `YouTube API error (${videosResponse.status}): ${
+          errorData.message || videosResponse.statusText
+        }`
+      );
     }
-    
+
     const videosData = await videosResponse.json();
-    
+
     if (!videosData.items || !Array.isArray(videosData.items)) {
-      console.warn('No videos found or invalid response format:', videosData);
+      console.warn("No videos found or invalid response format:", videosData);
       return [];
     }
-    
+
     // Define interface for YouTube API response item
     interface YouTubePlaylistItem {
       snippet: {
@@ -106,28 +117,28 @@ const fetchSermons = async (): Promise<YouTubeVideo[]> => {
     const sermons = (videosData.items as YouTubePlaylistItem[]).map((item) => {
       const videoId = item.snippet.resourceId.videoId;
       const thumbnails = item.snippet.thumbnails;
-      
+
       // Use the highest quality available thumbnail
-      const thumbnailUrl = thumbnails?.maxres?.url || 
-                          thumbnails?.standard?.url || 
-                          thumbnails?.high?.url || 
-                          thumbnails?.medium?.url || 
-                          thumbnails?.default?.url ||
-                          `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-      
+      const thumbnailUrl =
+        thumbnails?.maxres?.url ||
+        thumbnails?.standard?.url ||
+        thumbnails?.high?.url ||
+        thumbnails?.medium?.url ||
+        thumbnails?.default?.url ||
+        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
       return {
         id: videoId,
         title: item.snippet.title,
         description: item.snippet.description,
         thumbnail: thumbnailUrl,
         publishedAt: item.snippet.publishedAt,
-        videoUrl: `https://www.youtube.com/watch?v=${videoId}`
+        videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
       };
     });
-    
-    console.log('Successfully fetched', sermons.length, 'sermons');
+
+    console.log("Successfully fetched", sermons.length, "sermons");
     return sermons;
-    
   } catch (error) {
     console.error("Error in fetchSermons:", error);
     // Return empty array to prevent breaking the UI
@@ -144,20 +155,24 @@ export default function Home() {
     const loadSermons = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        console.log('Loading sermons...');
+        console.log("Loading sermons...");
         const data = await fetchSermons();
-        console.log('Sermons loaded:', data);
-        
+        console.log("Sermons loaded:", data);
+
         if (data.length === 0) {
-          setError("No recent sermons found. Please check back later or visit our YouTube channel.");
+          setError(
+            "No recent sermons found. Please check back later or visit our YouTube channel."
+          );
         }
-        
+
         setSermons(data);
       } catch (err) {
-        console.error('Error in loadSermons:', err);
-        setError("Unable to load sermons at this time. Please check our YouTube channel for the latest messages.");
+        console.error("Error in loadSermons:", err);
+        setError(
+          "Unable to load sermons at this time. Please check our YouTube channel for the latest messages."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -356,8 +371,9 @@ export default function Home() {
                   Community Outreach
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Serving our community and sharing God&apos;s love through practical
-                  acts of service, compassion, and intentional relationships.
+                  Serving our community and sharing God&apos;s love through
+                  practical acts of service, compassion, and intentional
+                  relationships.
                 </p>
               </div>
               <div className="mt-auto">
@@ -582,10 +598,10 @@ export default function Home() {
               This is more than a visit &#8212; it&#39;s a divine appointment.
             </p>
             <p className="mt-6 text-lg text-gray-200 max-w-xl">
-              Whether you&#39;re new to faith, looking for a church family, or just
-              curious &#8212; you are welcome. Join us this Sunday and experience
-              uplifting worship, biblical teaching, and a community that feels
-              like home.
+              Whether you&#39;re new to faith, looking for a church family, or
+              just curious &#8212; you are welcome. Join us this Sunday and
+              experience uplifting worship, biblical teaching, and a community
+              that feels like home.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
@@ -634,7 +650,7 @@ export default function Home() {
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
                 Stay Connected
               </h2>
-              <p className="mt-4 text-lg text-indigo-100">
+              <p className="mt-4 text-lg text-white-100">
                 Subscribe to our newsletter and never miss updates about
                 services, events, and community news.
               </p>
@@ -670,7 +686,7 @@ export default function Home() {
                   Subscribe
                 </button>
               </form>
-              <p className="mt-4 text-sm text-indigo-200">
+              <p className="mt-4 text-sm text-white-200">
                 We respect your privacy. Unsubscribe anytime.
               </p>
             </div>
