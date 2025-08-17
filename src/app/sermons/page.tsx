@@ -1,34 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiMapPin } from "react-icons/fi";
 import { VideoItem, fetchLatestVideos } from "@/lib/youtubeRSS";
+import { SermonListSkeleton } from "@/components/SermonSkeleton";
 
 function cleanTitle(title: string): string {
-  // Remove common patterns and clean up the title
-  return (
-    title
-      // Remove LIVE and any following |
-      .replace(/^\s*LIVE\s*\|?\s*/i, "")
-      // Remove everything after the last | if it contains 'WORSHIP & WORD OF GOD BY'
-      .replace(/\s*\|\s*WORSHIP & WORD OF GOD BY.*$/i, "")
-      // Remove any remaining | and trim whitespace
-      .replace(/\|/g, "")
-      .trim()
-      // Capitalize first letter of each word
-      .toLowerCase()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-      .trim()
-  );
+  return title
+    .replace(/^\s*LIVE\s*\|?\s*/i, "")
+    .replace(/\s*\|\s*WORSHIP & WORD OF GOD BY.*$/i, "")
+    .replace(/\|/g, "")
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .trim();
 }
-
-const SERVICE_SCHEDULE = [
-  { day: "Sunday", name: "Morning Service", time: "10:00 AM" },
-  { day: "Wednesday", name: "Bible Study", time: "7:00 PM" },
-  { day: "Friday", name: "Prayer Meeting", time: "7:00 PM" },
-];
 
 const CHANNEL_ID = "UCfGHCtW5XlkY78l97_Rwu4Q";
 
@@ -40,26 +27,38 @@ export default function SermonsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadVideos = async () => {
       try {
-        setIsLoading(true);
+        if (isMounted) setIsLoading(true);
         const latestVideos = await fetchLatestVideos(CHANNEL_ID, 6);
-        setVideos(latestVideos);
+        if (isMounted) {
+          setVideos(latestVideos);
 
-        // Set the first video as default
-        if (latestVideos.length > 0) {
-          setCurrentVideoId(latestVideos[0].id);
-          setCurrentTitle(latestVideos[0].title);
+          if (latestVideos.length > 0) {
+            setCurrentVideoId(latestVideos[0].id);
+            setCurrentTitle(latestVideos[0].title);
+          }
         }
       } catch (err) {
         console.error("Failed to load videos:", err);
-        setError("Failed to load videos. Please try again later.");
+        if (isMounted)
+          setError("Failed to load videos. Please try again later.");
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadVideos();
+
+    // 🔄 Auto-refresh every 5 minutes
+    const interval = setInterval(loadVideos, 5 * 60 * 1000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleVideoClick = (video: VideoItem) => {
@@ -67,7 +66,6 @@ export default function SermonsPage() {
     setCurrentTitle(cleanTitle(video.title));
   };
 
-  // Clean video titles before rendering
   const cleanedVideos = videos.map((video) => ({
     ...video,
     title: cleanTitle(video.title),
@@ -76,11 +74,8 @@ export default function SermonsPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero */}
-
-        {/* Video + Service Info */}
+        {/* Video */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Video */}
           <div
             className="flex-1 relative bg-black rounded-xl overflow-hidden shadow-2xl"
             style={{ paddingTop: "56.25%" }}
@@ -101,7 +96,7 @@ export default function SermonsPage() {
         <section className="py-8">
           <h2 className="text-3xl font-bold text-white mb-8">Recent Sermons</h2>
           {isLoading ? (
-            <div className="text-center text-gray-400">Loading sermons...</div>
+            <SermonListSkeleton count={6} />
           ) : error ? (
             <div className="text-center text-red-400">{error}</div>
           ) : videos.length === 0 ? (
