@@ -29,21 +29,15 @@ interface YouTubeVideo {
 
 // YouTube API integration
 const fetchSermons = async (): Promise<YouTubeVideo[]> => {
-  // In production with static export, return an empty array
-  if (process.env.NODE_ENV === 'production') {
-    console.log('Running in production mode, returning empty sermons array');
-    return [];
-  }
-
   try {
-    console.log('Fetching sermons from YouTube API directly...');
+    console.log('Fetching sermons from YouTube API...');
     
-    // In development, fetch directly from YouTube API
-    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-    const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
+    // Get API keys from environment
+    const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY;
+    const YOUTUBE_CHANNEL_ID = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || process.env.YOUTUBE_CHANNEL_ID;
     
     if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
-      console.error('Missing YouTube API configuration');
+      console.warn('Missing YouTube API configuration');
       throw new Error('YouTube API is not properly configured');
     }
     
@@ -157,28 +151,23 @@ export default function Home() {
         console.log('Sermons loaded:', data);
         
         if (data.length === 0) {
-          if (process.env.NODE_ENV === 'production') {
-            setError("Sermon videos are not available in the static version of the site. Please check our YouTube channel.");
-          } else {
-            setError("No sermons found. This could be because:\n" +
-                    "1. YouTube API is not properly configured\n" +
-                    "2. No videos found in the specified channel\n" +
-                    "3. Check browser console for detailed error information");
-          }
+          setError("No recent sermons found. Please check back later or visit our YouTube channel.");
         }
         
         setSermons(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         console.error('Error in loadSermons:', err);
-        setError(`Failed to load sermons: ${errorMessage}. Please check the console for more details.`);
+        setError("Unable to load sermons at this time. Please check our YouTube channel for the latest messages.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadSermons();
-  }, []);
+    // Only attempt to load if we haven't already loaded or if there was an error
+    if (sermons.length === 0 && !error) {
+      loadSermons();
+    }
+  }, [sermons.length, error]);
 
   if (isLoading) {
     return (
