@@ -22,7 +22,7 @@ const navItems = [
   { name: "About", href: "/about" },
   { name: "Sermons", href: "/sermons" },
   { name: "Ministries", href: "/ministries" },
-  { name: "Giving", href: "/giving" },
+  { name: "Giving", href: "/donate" },
 ];
 
 export function MainNav() {
