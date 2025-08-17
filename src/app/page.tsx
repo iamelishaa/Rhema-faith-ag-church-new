@@ -183,20 +183,20 @@ export default function Home() {
         console.log("Loading sermons from RSS...");
         const data = await fetchLatestVideos("UCfGHCtW5XlkY78l97_Rwu4Q", 3);
         console.log("Sermons loaded:", data);
-        console.log(`Number of videos received: ${data.length}`);
+        console.log(`Number of videos received: ${data.videos.length}`);
         console.log(
           "Video IDs:",
-          data.map((v) => v.id)
+          data.videos.map((v) => v.id)
         );
 
-        if (data.length === 0) {
+        if (data.videos.length === 0) {
           setError(
             "No recent sermons found. Please check back later or visit our YouTube channel."
           );
         }
 
         // Ensure we only keep the first 3 videos
-        const limitedData = data.slice(0, 3);
+        const limitedData = data.videos.slice(0, 3);
         console.log(`After limiting: ${limitedData.length} videos`);
         setSermons(limitedData);
       } catch (err) {

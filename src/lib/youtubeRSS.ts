@@ -5,10 +5,16 @@ export interface VideoItem {
   thumbnail: string;
 }
 
+export interface VideoResponse {
+  videos: VideoItem[];
+  nextPageToken?: string;
+}
+
 export async function fetchLatestVideos(
   channelId: string,
-  maxResults: number = 6
-): Promise<VideoItem[]> {
+  maxResults: number = 6,
+  startIndex: string = "0"
+): Promise<VideoResponse> {
   try {
     // Try direct fetch first
     const targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
@@ -60,7 +66,7 @@ export async function fetchLatestVideos(
 
     if (entries.length === 0) {
       console.warn("No video entries found in the feed");
-      return [];
+      return { videos: [] };
     }
 
     // Log total entries before limiting
@@ -69,7 +75,7 @@ export async function fetchLatestVideos(
     );
 
     // Ensure we only process up to maxResults entries
-    const limitedEntries = entries.slice(0, maxResults);
+    const limitedEntries = entries.slice(parseInt(startIndex), parseInt(startIndex) + maxResults);
     console.log(
       `Processing ${limitedEntries.length} entries (limited to ${maxResults})`
     );
@@ -77,34 +83,46 @@ export async function fetchLatestVideos(
     // Map entries to video items
     const videos = limitedEntries
       .map((entry) => {
-        const id =
-          entry.getElementsByTagName("yt:videoId")[0]?.textContent || "";
-        const title =
-          entry.getElementsByTagName("title")[0]?.textContent ||
-          "Untitled Video";
-        const published =
-          entry.getElementsByTagName("published")[0]?.textContent || "";
-        const thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+        try {
+          const id =
+            entry.getElementsByTagName("yt:videoId")[0]?.textContent || "";
+          const title =
+            entry.getElementsByTagName("title")[0]?.textContent ||
+            "Untitled Video";
+          const published =
+            entry.getElementsByTagName("published")[0]?.textContent || "";
+          const thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
 
-        if (!id) {
-          console.warn("Entry missing videoId:", entry);
+          if (!id) {
+            console.warn("Entry missing videoId:", entry);
+            return null;
+          }
+
+          return {
+            id,
+            title,
+            published,
+            thumbnail,
+          };
+        } catch (error) {
+          console.error("Error parsing video entry:", error);
+          return null;
         }
-
-        return {
-          id,
-          title,
-          published,
-          thumbnail,
-        };
       })
-      .filter((video) => video.id); // Filter out any entries without an ID
+      .filter((video): video is VideoItem => video !== null); // Filter out any entries without an ID
 
-    console.log(`Processed ${videos.length} videos`);
+    const filteredVideos = videos.filter((v): v is VideoItem => v !== null);
+    
+    console.log(`Processed ${filteredVideos.length} videos`);
     console.log(
       "Video IDs being returned:",
-      videos.map((v) => v.id)
+      filteredVideos.map((v) => v.id)
     );
-    return videos;
+    
+    return {
+      videos: filteredVideos,
+      nextPageToken: filteredVideos.length === maxResults ? String(parseInt(startIndex) + maxResults) : undefined
+    };
   } catch (error: unknown) {
     console.error("Error in fetchLatestVideos:", error);
     if (error instanceof Error) {
@@ -117,6 +135,6 @@ export async function fetchLatestVideos(
       console.error("Unknown error occurred:", String(error));
     }
     // Return a fallback empty array if there's an error
-    return [];
+    return { videos: [] };
   }
 }
