@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const sourceDir = path.join(__dirname, '../public/images');
-const destDir = path.join(__dirname, '../out/_next/static/media');
+const destDir = path.join(__dirname, '../out/static/media');
 
 // Ensure destination directory exists
 fs.ensureDirSync(destDir);

@@ -1,40 +1,19 @@
 [build]
   command = "npm install && npm run build"
-  publish = ".next"
-  functions = ".next/functions"
+  publish = "out"
 
 [build.environment]
-  NODE_VERSION = "20.11.1"  # Using LTS version for better compatibility
+  NODE_VERSION = "20.11.1"
   NPM_FLAGS = "--legacy-peer-deps"
   NEXT_TELEMETRY_DISABLED = "1"
 
-[build.processing]
-  skip_processing = false
-
-[build.processing.html]
-  pretty_urls = true
-  skip = false
-
-[build.processing.css]
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.images]
-  compress = true
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
+# Required for Next.js static exports
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
 
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
