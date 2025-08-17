@@ -45,12 +45,18 @@ const nextConfig = {
     formats: ['image/webp'],
     // Cache images for 1 hour (in seconds)
     minimumCacheTTL: 3600,
-    // Disable image optimization in development for faster builds
-    disableStaticImages: process.env.NODE_ENV === 'development',
+    // Enable static image imports
+    disableStaticImages: false,
     // Enable content security policy for images
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Enable unoptimized images for static export
+    unoptimized: process.env.NODE_ENV === 'production',
   },
+  
+  // Static export configuration
+  output: 'export',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/_next/static' : undefined,
 
   // Webpack configuration
   webpack: (config, { isServer, dev }) => {
