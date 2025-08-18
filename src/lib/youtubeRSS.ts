@@ -8,7 +8,24 @@ export interface VideoItem {
 export interface VideoResponse {
   videos: VideoItem[];
   nextPageToken?: string;
+  error?: string;
 }
+
+// Fallback video data in case the feed is unavailable
+const FALLBACK_VIDEOS: VideoItem[] = [
+  {
+    id: 'welcome-video-1',
+    title: 'Welcome to Our Channel',
+    published: new Date().toISOString(),
+    thumbnail: '/images/placeholder-1.jpg',
+  },
+  {
+    id: 'sermon-video-2',
+    title: 'Latest Sermon',
+    published: new Date(Date.now() - 86400000).toISOString(),
+    thumbnail: '/images/placeholder-2.jpg',
+  },
+];
 
 export async function fetchLatestVideos(
   channelId: string,
@@ -20,30 +37,66 @@ export async function fetchLatestVideos(
     const targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
     console.log("Fetching YouTube RSS feed from:", targetUrl);
 
-    // First try direct fetch
     let response;
+    let useFallback = false;
+    let lastError: Error | null = null;
+    
     try {
+      // Try direct fetch first
       response = await fetch(targetUrl, {
-        mode: "cors",
-        credentials: "omit",
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          'Content-Type': 'application/xml',
+        },
       });
 
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-    } catch (directError) {
-      console.log(
-        "Direct fetch failed, trying with CORS proxy...",
-        directError
-      );
-      // If direct fetch fails, try with CORS proxy
-      const proxyUrl = "https://api.allorigins.win/raw?url=";
-      response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-
       if (!response.ok) {
-        throw new Error(
-          `CORS proxy fetch failed with status: ${response.status}`
-        );
+        console.warn(`Direct fetch failed with status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+    } catch (directError) {
+      console.warn("Direct fetch failed, trying with CORS proxy...", directError);
+      
+      try {
+        // Try with CORS proxy
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+          console.warn(`CORS proxy fetch failed with status: ${response.status}`);
+          throw new Error(`CORS proxy fetch failed with status: ${response.status}`);
+        }
+        
+        // Parse the AllOrigins response
+        const data = await response.json();
+        if (data.contents) {
+          // Create a new response with the contents
+          response = new Response(data.contents, {
+            status: 200,
+            headers: { 'Content-Type': 'application/xml' }
+          });
+        } else {
+          throw new Error('Invalid response from CORS proxy');
+        }
+      } catch (proxyError) {
+        lastError = proxyError as Error;
+        console.error("All fetch methods failed, using fallback data", {
+          error: lastError.message,
+          stack: lastError.stack
+        });
+        useFallback = true;
+      }
+    }
+
+    if (useFallback || !response) {
+      console.warn("Using fallback video data. Last error:", lastError?.message || 'Unknown error');
+      return {
+        videos: FALLBACK_VIDEOS.slice(0, maxResults),
+        nextPageToken: undefined,
+        error: lastError?.message || 'Failed to fetch videos'
+      };
     }
 
     const xmlText = await response.text();

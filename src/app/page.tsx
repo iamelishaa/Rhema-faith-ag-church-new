@@ -170,40 +170,45 @@ const fetchSermons = async (): Promise<YouTubeVideo[]> => {
 };
 
 export default function Home() {
+  console.log('Rendering Home component');
   const [sermons, setSermons] = useState<VideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSermons = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
-        console.log("Loading sermons from RSS...");
-        const data = await fetchLatestVideos("UCfGHCtW5XlkY78l97_Rwu4Q", 3);
-        console.log("Sermons loaded:", data);
-        console.log(`Number of videos received: ${data.videos.length}`);
-        console.log(
-          "Video IDs:",
-          data.videos.map((v) => v.id)
+        setIsLoading(true);
+        setError(null);
+        
+        const result = await fetchLatestVideos(
+          process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '',
+          3
         );
-
-        if (data.videos.length === 0) {
-          setError(
-            "No recent sermons found. Please check back later or visit our YouTube channel."
-          );
+        
+        console.log('Sermons loaded:', result);
+        
+        // If there was an error in fetching, show it to the user
+        if (result.error) {
+          console.warn('Warning from YouTube API:', result.error);
+          setError(`Unable to load latest videos: ${result.error}. Showing sample content.`);
         }
-
-        // Ensure we only keep the first 3 videos
-        const limitedData = data.videos.slice(0, 3);
-        console.log(`After limiting: ${limitedData.length} videos`);
-        setSermons(limitedData);
-      } catch (err) {
-        console.error("Error loading sermons:", err);
-        setError(
-          "Unable to load sermons at this time. Please check our YouTube channel for the latest messages."
+        
+        console.log('Number of videos received:', result.videos.length);
+        console.log('Video IDs:', result.videos.map(v => v.id));
+        
+        // Filter out any duplicate videos
+        const uniqueVideos = result.videos.filter((video, index, self) => 
+          index === self.findIndex((v) => v.id === video.id)
         );
+        
+        console.log('After deduplication:', uniqueVideos.length, 'videos');
+        
+        setSermons(uniqueVideos);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        console.error('Error in loadSermons:', errorMessage, err);
+        setError(`Failed to load sermons: ${errorMessage}. Showing sample content.`);
       } finally {
         setIsLoading(false);
       }
@@ -212,16 +217,40 @@ export default function Home() {
     loadSermons();
   }, [sermons.length, error]);
 
+  console.log('Render state:', { isLoading, error, sermonCount: sermons.length });
+  
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading content...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Oops! Something went wrong</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+      {/* Add a subtle background pattern */}
+      <div className="absolute inset-0 bg-grid-gray-100 dark:bg-grid-gray-800 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.8))] dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
       <section className="relative bg-gray-900 text-white overflow-hidden min-h-screen">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">

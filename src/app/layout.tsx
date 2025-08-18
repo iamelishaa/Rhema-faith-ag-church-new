@@ -1,14 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { MainNav } from "@/components/MainNav";
-import Footer from "@/components/Footer";
-import Body from "@/components/Body";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+import ClientLayout from "./client-layout";
 
 export const metadata: Metadata = {
   title: "Rhema Faith AG Church",
@@ -25,12 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <Body className={`${inter.className} font-sans flex flex-col min-h-screen`}>
-        <MainNav />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </Body>
-    </html>
+    <ClientLayout>
+      {children}
+    </ClientLayout>
   );
 }

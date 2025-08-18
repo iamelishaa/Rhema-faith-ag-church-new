@@ -21,9 +21,6 @@ const nextConfig = {
     ],
   },
   
-  // Static export configuration
-  output: 'export',
-  
   // TypeScript configuration
   typescript: {
     ignoreBuildErrors: true,
