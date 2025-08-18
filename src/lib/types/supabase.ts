@@ -13,8 +13,8 @@ export interface UserProfile {
 export interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }

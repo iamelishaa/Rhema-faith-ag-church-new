@@ -2,15 +2,19 @@ import Link from 'next/link';
 import { YouTubeVideo } from '@/lib/youtube';
 import { Button } from './ui/button';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 export function SermonCard({ sermon }: { sermon: YouTubeVideo }) {
   return (
     <div className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       <div className="relative pt-[56.25%] bg-gray-200 dark:bg-gray-600">
-        <img
+        <Image
           src={sermon.thumbnail}
           alt={sermon.title}
-          className="absolute top-0 left-0 w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized={sermon.thumbnail?.startsWith('data:')}
         />
         <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
           {sermon.duration}

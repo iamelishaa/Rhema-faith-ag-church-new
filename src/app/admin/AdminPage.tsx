@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 import { UserProfile, UserRole } from "@/lib/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SimpleAlert } from "@/components/ui/simple-alert";
-import { AlertCircle, Loader2, Search, UserPlus } from "lucide-react";
+import { Loader2, Search, UserPlus } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
-// Type for the user data we get from Supabase
-interface SupabaseUserProfile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  role: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -312,12 +303,15 @@ export default function AdminDashboard() {
                           <TableRow key={user.id}>
                             <TableCell className="font-medium">
                               <div className="flex items-center space-x-3">
-                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                                   {user.avatar_url ? (
-                                    <img
+                                    <Image
                                       src={user.avatar_url}
                                       alt={user.full_name || 'User'}
-                                      className="h-8 w-8 rounded-full object-cover"
+                                      width={32}
+                                      height={32}
+                                      className="h-8 w-8 object-cover"
+                                      unoptimized={user.avatar_url?.startsWith('data:')}
                                     />
                                   ) : (
                                     <span className="text-sm">

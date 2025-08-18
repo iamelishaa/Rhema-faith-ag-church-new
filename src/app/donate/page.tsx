@@ -161,29 +161,42 @@ export default function DonatePage() {
               </h3>
 
               {amount > 0 ? (
-                <PaymentButtons
-                  amount={amount}
-                  category={
-                    GIVING_CATEGORIES.find((c) => c.id === category)?.name ||
-                    "Donation"
-                  }
-                  onPaymentInit={() => {
-                    setIsProcessing(true);
-                    toast.loading("Processing your donation...");
-                  }}
-                  onPaymentSuccess={() => {
-                    toast.success("Payment successful! Thank you for your donation.");
-                    // Reset form
-                    setAmount(0);
-                    setCustomAmount("");
-                    setSelectedPresetAmount(0);
-                  }}
-                  onPaymentError={(error) => {
-                    toast.error(
-                      error.message || "Payment failed. Please try again."
-                    );
-                  }}
-                />
+                <>
+                  <PaymentButtons
+                    amount={amount}
+                    category={
+                      GIVING_CATEGORIES.find((c) => c.id === category)?.name ||
+                      "Donation"
+                    }
+                    onPaymentInit={() => {
+                      setIsProcessing(true);
+                      toast.loading("Processing your donation...");
+                    }}
+                    onPaymentSuccess={() => {
+                      toast.success(
+                        "Payment successful! Thank you for your donation."
+                      );
+                      // Reset form
+                      setAmount(0);
+                      setCustomAmount("");
+                      setSelectedPresetAmount(0);
+                      setIsProcessing(false);
+                    }}
+                    onPaymentError={(error) => {
+                      setIsProcessing(false);
+                      toast.error(
+                        error.message || "Payment failed. Please try again."
+                      );
+                    }}
+                    disabled={isProcessing} // 🔥 now used
+                  />
+
+                  {isProcessing && (
+                    <p className="text-center mt-4 text-indigo-600 font-medium">
+                      Processing donation...
+                    </p>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-4 text-gray-500">
                   Please select an amount to continue

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiUsers, FiHeart, FiMusic, FiMic, FiCoffee } from "react-icons/fi";
+import { FiUsers, FiHeart, FiMusic, FiMic } from "react-icons/fi";
 import { useState } from "react";
 
 // Ministry type
@@ -98,7 +98,7 @@ export default function Ministries() {
           </h1>
           <p className="mt-6 max-w-3xl mx-auto text-xl text-gray-300">
             Discover your place to connect, grow, and serve at Rhema Faith AG
-            Church. There's a place for everyone in God's family!
+            Church. There&apos;s a place for everyone in God&apos;s family!
           </p>
         </div>
       </div>
@@ -201,10 +201,10 @@ export default function Ministries() {
         <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
             <span className="block">Want to start a new ministry?</span>
-            <span className="block">Let's talk!</span>
+            <span className="block">Let&apos;s talk!</span>
           </h2>
           <p className="mt-4 text-lg leading-6 text-gray-300">
-            We're always looking for passionate leaders to help us serve our
+            We&apos;re always looking for passionate leaders to help us serve our
             community in new ways.
           </p>
           <div className="mt-8 flex justify-center">

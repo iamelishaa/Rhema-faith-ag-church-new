@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Loader2, Smartphone, CreditCard } from "lucide-react";
+import { Loader2, Smartphone } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 interface PaymentButtonsProps {
   amount: number;
@@ -11,6 +12,7 @@ interface PaymentButtonsProps {
   onPaymentSuccess: () => void;
   onPaymentError: (error: Error) => void;
   upiId?: string;
+  disabled?: boolean;
 }
 
 export default function PaymentButtons({
@@ -20,6 +22,7 @@ export default function PaymentButtons({
   onPaymentSuccess,
   onPaymentError,
   upiId = "your-upi-id@okhdfcbank",
+  disabled = false,
 }: PaymentButtonsProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeMethod, setActiveMethod] = useState<string | null>(null);
@@ -30,13 +33,20 @@ export default function PaymentButtons({
       setIsProcessing(true);
       setActiveMethod(method);
 
+      // Create payment URL based on method
+      let paymentUrl: string;
+
       if (method === "googlepay") {
-        const paymentUrl = `upi://pay?pa=${encodeURIComponent(
+        paymentUrl = `upi://pay?pa=${encodeURIComponent(
           upiId
         )}&pn=${encodeURIComponent(
           "Rhema Faith AG Church"
         )}&am=${amount}&cu=INR&tn=Donation for ${encodeURIComponent(category)}`;
+
+        // Try direct UPI first
         window.location.href = paymentUrl;
+
+        // Fallback to Google Pay web if UPI app not found
         setTimeout(() => {
           if (document.visibilityState === "visible") {
             window.open(
@@ -46,10 +56,16 @@ export default function PaymentButtons({
           }
         }, 500);
       } else if (method === "phonepe") {
-        const phonePeUrl = `phonepe://pay?pa=${encodeURIComponent(
+        paymentUrl = `phonepe://pay?pa=${encodeURIComponent(
           upiId
-        )}&pn=RhemaFaithAG&am=${amount}&cu=INR&tn=Donation`;
-        window.location.href = phonePeUrl;
+        )}&pn=RhemaFaithAG&am=${amount}&cu=INR&tn=Donation for ${encodeURIComponent(
+          category
+        )}`;
+
+        // Try direct PhonePe URL first
+        window.location.href = paymentUrl;
+
+        // Fallback to Play Store if app not installed
         setTimeout(() => {
           if (document.visibilityState === "visible") {
             window.open(
@@ -59,7 +75,11 @@ export default function PaymentButtons({
           }
         }, 500);
       }
+
+      // Consider the payment initiated successfully if we reach here without errors
+      onPaymentSuccess();
     } catch (error) {
+      console.error("Payment error:", error);
       onPaymentError(
         error instanceof Error ? error : new Error("Payment failed")
       );
@@ -80,7 +100,7 @@ export default function PaymentButtons({
           type="button"
           variant="outline"
           onClick={() => handlePayment("googlepay")}
-          disabled={isProcessing}
+          disabled={isProcessing || disabled}
           className="w-full h-14 border-gray-300 hover:bg-gray-50 hover:border-gray-400 flex items-center justify-between px-6"
         >
           {isProcessing && activeMethod === "googlepay" ? (
@@ -88,11 +108,15 @@ export default function PaymentButtons({
           ) : (
             <>
               <span className="text-gray-800 font-medium">Google Pay</span>
-              <img
-                src="https://www.gstatic.com/instantbuy/svg/google-pay.svg"
-                alt="Google Pay"
-                className="h-6"
-              />
+              <div className="relative h-6 w-24">
+                <Image
+                  src="/images/google-pay.svg"
+                  alt="Google Pay"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
             </>
           )}
         </Button>
@@ -107,7 +131,7 @@ export default function PaymentButtons({
           type="button"
           variant="outline"
           onClick={() => handlePayment("phonepe")}
-          disabled={isProcessing}
+          disabled={isProcessing || disabled}
           className="w-full h-14 border-gray-300 hover:bg-gray-50 hover:border-gray-400 flex items-center justify-between px-6"
         >
           {isProcessing && activeMethod === "phonepe" ? (

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { VideoItem, fetchLatestVideos } from "@/lib/youtubeRSS";
 import { SermonListSkeleton } from "@/components/SermonSkeleton";
+import Image from "next/image";
 
 function cleanTitle(title: string): string {
   return title
@@ -153,10 +154,13 @@ export default function SermonsPage() {
                     onClick={() => handleVideoClick(video)}
                   >
                     <div className="relative w-full aspect-video">
-                      <img
+                      <Image
                         src={video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        unoptimized={video.thumbnail?.startsWith('data:')}
                       />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">

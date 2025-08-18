@@ -41,133 +41,6 @@ import {
   MapPin,
 } from "lucide-react";
 
-interface YouTubeVideo {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  publishedAt: string;
-  videoUrl: string;
-}
-
-// YouTube API integration
-const fetchSermons = async (): Promise<YouTubeVideo[]> => {
-  try {
-    console.log("Fetching sermons from YouTube API...");
-
-    // Get API keys from environment
-    const YOUTUBE_API_KEY =
-      process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY;
-    const YOUTUBE_CHANNEL_ID =
-      process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID ||
-      process.env.YOUTUBE_CHANNEL_ID;
-
-    if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
-      console.warn("Missing YouTube API configuration");
-      throw new Error("YouTube API is not properly configured");
-    }
-
-    // First, get the uploads playlist ID with more details
-    const channelResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&id=${YOUTUBE_CHANNEL_ID}&maxResults=1&key=${YOUTUBE_API_KEY}`
-    );
-
-    if (!channelResponse.ok) {
-      const errorData = await channelResponse.json();
-      console.error("YouTube API error:", errorData);
-      throw new Error(
-        `YouTube API error: ${channelResponse.status} ${channelResponse.statusText}`
-      );
-    }
-
-    const channelData = await channelResponse.json();
-
-    if (!channelData.items || channelData.items.length === 0) {
-      throw new Error("No channel found with the provided CHANNEL_ID");
-    }
-
-    const uploadsPlaylistId =
-      channelData.items[0].contentDetails.relatedPlaylists.uploads;
-
-    // Then, get the videos from the uploads playlist with all necessary parts
-    const videosResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlistItems?` +
-        new URLSearchParams({
-          part: "snippet,contentDetails",
-          maxResults: "10",
-          playlistId: uploadsPlaylistId,
-          key: YOUTUBE_API_KEY,
-        })
-    );
-
-    if (!videosResponse.ok) {
-      const errorData = await videosResponse.json().catch(() => ({}));
-      console.error("YouTube Videos API error:", errorData);
-      throw new Error(
-        `YouTube API error (${videosResponse.status}): ${
-          errorData.message || videosResponse.statusText
-        }`
-      );
-    }
-
-    const videosData = await videosResponse.json();
-
-    if (!videosData.items || !Array.isArray(videosData.items)) {
-      console.warn("No videos found or invalid response format:", videosData);
-      return [];
-    }
-
-    // Define interface for YouTube API response item
-    interface YouTubePlaylistItem {
-      snippet: {
-        title: string;
-        description: string;
-        publishedAt: string;
-        thumbnails: {
-          maxres?: { url: string };
-          standard?: { url: string };
-          high?: { url: string };
-          medium?: { url: string };
-          default?: { url: string };
-        };
-        resourceId: {
-          videoId: string;
-        };
-      };
-    }
-
-    // Transform the response to match our component's expected format
-    const sermons = (videosData.items as YouTubePlaylistItem[]).map((item) => {
-      const videoId = item.snippet.resourceId.videoId;
-      const thumbnails = item.snippet.thumbnails;
-
-      // Use the highest quality available thumbnail
-      const thumbnailUrl =
-        thumbnails?.maxres?.url ||
-        thumbnails?.standard?.url ||
-        thumbnails?.high?.url ||
-        thumbnails?.medium?.url ||
-        thumbnails?.default?.url ||
-        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-
-      return {
-        id: videoId,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnail: thumbnailUrl,
-        publishedAt: item.snippet.publishedAt,
-        videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
-      };
-    });
-
-    console.log("Successfully fetched", sermons.length, "sermons");
-    return sermons;
-  } catch (error) {
-    console.error("Error in fetchSermons:", error);
-    // Return empty array to prevent breaking the UI
-    return [];
-  }
-};
 
 export default function Home() {
   console.log('Rendering Home component');
@@ -242,7 +115,7 @@ export default function Home() {
             </div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Oops! Something went wrong</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {error} Don't worry, we're showing sample content for now.
+              {error} Don&apos;t worry, we&apos;re showing sample content for now.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <button

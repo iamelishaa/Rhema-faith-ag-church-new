@@ -4,11 +4,6 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import type { Sermon } from "./SermonCard";
 
-const getPreacher = (sermon: Sermon): string => {
-  const titleMatch = sermon.title.match(/\s*-\s*([^-]+)$/);
-  return titleMatch ? titleMatch[1].trim() : "Speaker";
-};
-
 type SermonHeroProps = {
   latestSermon: Sermon | null;
 };
